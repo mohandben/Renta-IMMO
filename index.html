@@ -465,12 +465,15 @@
   var acNote = document.getElementById('ac-note');
   var acTimeout = null;
 
+  var secteurAutoTimeout = null;
+
   lieuInput.addEventListener('input', function(){
     selectedCp = '';
     selectedLat = null;
     selectedLon = null;
     var q = lieuInput.value.trim();
     clearTimeout(acTimeout);
+    clearTimeout(secteurAutoTimeout);
     if(q.length < 3){ suggBox.style.display = 'none'; return; }
     acTimeout = setTimeout(function(){
       fetch('https://api-adresse.data.gouv.fr/search/?q=' + encodeURIComponent(q) + '&limit=5')
@@ -491,6 +494,8 @@
               if(coords){ selectedLon = coords[0]; selectedLat = coords[1]; }
               suggBox.style.display = 'none';
               maybeFillSecteur();
+              clearTimeout(secteurAutoTimeout);
+              runSecteurLookup(label, true);
             });
             suggBox.appendChild(opt);
           });
@@ -501,6 +506,11 @@
           acNote.textContent = "Recherche d'adresse indisponible ici — saisie libre possible.";
         });
     }, 300);
+    // Si l'utilisatrice tape librement sans choisir de suggestion, on relance quand même
+    // la recherche secteur automatiquement après une courte pause de frappe.
+    secteurAutoTimeout = setTimeout(function(){
+      if(q.length >= 6){ runSecteurLookup(q, true); }
+    }, 900);
   });
   document.addEventListener('click', function(e){
     if(!lieuInput.contains(e.target) && !suggBox.contains(e.target)) suggBox.style.display = 'none';
@@ -621,9 +631,8 @@
     }
   }
 
-  document.getElementById('btn-update-secteur').addEventListener('click', function(){
-    var q = (lieuInput.value || '').trim();
-    if(!q){ alert("Saisissez d'abord une adresse ou un code postal."); return; }
+  function runSecteurLookup(q, silent){
+    if(!q){ if(!silent) alert("Saisissez d'abord une adresse ou un code postal."); return; }
     var note = document.getElementById('secteur-readout');
     note.textContent = 'Recherche des ventes réelles à proximité (DVF, rayon 500m)...';
 
@@ -637,13 +646,19 @@
             updateValorisationLive();
             var dates = comps.map(function(c){ return c.date; }).filter(Boolean).sort();
             var range = dates.length ? (' (' + dates[0].slice(0,4) + '–' + dates[dates.length-1].slice(0,4) + ')') : '';
-            note.textContent = 'Mis à jour automatiquement : ' + fmt(med) + ' €/m² — médiane de ' + comps.length + ' ventes DVF réelles dans un rayon de 500m' + range + '. Ajustez si besoin.';
-          } else {
+            note.textContent = 'Mis à jour automatiquement : ' + fmt(med) + ' €/m² — médiane de ' + comps.length + ' ventes DVF réelles dans un rayon de 500m' + range + '.';
+          } else if(!silent){
             openDvfFallback(q, 'Pas assez de ventes DVF trouvées à proximité immédiate. ');
+          } else {
+            note.textContent = 'Pas assez de ventes DVF à proximité immédiate — cliquez "Calculer le prix secteur" pour une vérification manuelle si besoin.';
           }
         })
         .catch(function(){
-          openDvfFallback(q, "Le service DVF automatique n'a pas répondu (il n'est pas garanti disponible en continu). ");
+          if(!silent){
+            openDvfFallback(q, "Le service DVF automatique n'a pas répondu (il n'est pas garanti disponible en continu). ");
+          } else {
+            note.textContent = "Le service DVF automatique n'a pas répondu — cliquez \"Calculer le prix secteur\" pour réessayer ou vérifier manuellement.";
+          }
         });
     }
 
@@ -652,9 +667,13 @@
     } else {
       geocodeAddress(q).then(function(coords){
         if(coords){ withCoords(coords.lat, coords.lon); }
-        else { openDvfFallback(q, "Adresse non géolocalisable automatiquement. "); }
+        else if(!silent){ openDvfFallback(q, "Adresse non géolocalisable automatiquement. "); }
       });
     }
+  }
+
+  document.getElementById('btn-update-secteur').addEventListener('click', function(){
+    runSecteurLookup((lieuInput.value || '').trim(), false);
   });
 
   // ---------- Carte des biens (Leaflet + OpenStreetMap, sans clé API) ----------
