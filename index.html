@@ -58,6 +58,11 @@
 
   .layout{display:grid;grid-template-columns:330px 1fr;gap:24px;align-items:start;}
   @media (max-width:820px){.layout{grid-template-columns:1fr;}}
+  .left-col{display:flex;flex-direction:column;gap:24px;}
+  .filters-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+  .filters-bar input[type="text"]{flex:2;min-width:180px;}
+  .filters-bar select{flex:1;min-width:120px;}
+  .filters-bar input, .filters-bar select{background:#fff;border:1px solid var(--ink-soft);padding:7px 8px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);}
 
   .panel{background:rgba(255,255,255,0.55);border:1px solid var(--ink);padding:18px;}
   .panel h2{font-family:'Zilla Slab',serif;font-size:15px;margin:0 0 14px 0;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px dashed var(--ink-soft);padding-bottom:8px;}
@@ -86,6 +91,13 @@
   .gradbar .thresh{position:absolute;top:-6px;width:2px;height:22px;background:var(--gold);transform:translateX(-50%);}
   .gradbar .thresh .lbl{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--gold);white-space:nowrap;}
   .bar-readout{font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;margin-top:10px;padding:8px 10px;background:rgba(255,255,255,0.6);border-left:3px solid var(--gold);color:var(--ink);}
+  .hist-label{font-family:'IBM Plex Mono',monospace;font-size:9.5px;text-transform:uppercase;color:var(--ink-soft);letter-spacing:0.4px;margin-top:12px;}
+  .hist-bars{display:flex;align-items:flex-end;gap:8px;height:90px;margin-top:6px;}
+  .hist-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+  .hist-val{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--ink-soft);margin-bottom:3px;}
+  .hist-bar{width:100%;background:var(--gold);}
+  .hist-bar.empty{background:var(--paper-line);}
+  .hist-yr{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--ink-soft);margin-top:4px;}
 
   .btn{margin-top:18px;width:100%;background:var(--ink);color:var(--paper);border:none;padding:11px;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.5px;text-transform:uppercase;cursor:pointer;}
   .btn:hover{background:var(--gold);}
@@ -154,6 +166,8 @@
   .map-modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
   .map-modal-header h3{font-family:'Zilla Slab',serif;font-size:17px;margin:0;font-weight:600;}
   #leaflet-map{flex:1;border:1px solid var(--ink-soft);min-height:200px;}
+  #heatmap-legend{display:flex;align-items:center;gap:10px;margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-soft);}
+  #heatmap-legend .grad{width:140px;height:8px;background:linear-gradient(90deg, #3F6B4F 0%, #C9A227 50%, #A6472F 100%);}
   #map-status{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);margin-bottom:8px;}
 
   .login-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--paper);z-index:2000;display:flex;align-items:center;justify-content:center;}
@@ -205,6 +219,24 @@
   </div>
 
   <div class="layout">
+    <div class="left-col">
+    <div class="panel">
+      <h2>Capacité d'emprunt</h2>
+      <label>Revenus nets mensuels du foyer (€)</label>
+      <input id="f-cap-revenus" type="number" min="0" placeholder="3500">
+      <label>Charges de crédit existantes /mois (€)</label>
+      <input id="f-cap-charges" type="number" min="0" placeholder="0">
+      <div class="row2">
+        <div><label>Taux d'endettement max (%)</label><input id="f-cap-taux-endett" type="number" min="0" max="100" value="35"></div>
+        <div><label>Taux annuel emprunt (%)</label><input id="f-cap-taux" type="number" min="0" step="0.05" placeholder="3,80"></div>
+      </div>
+      <label>Durée souhaitée (années)</label>
+      <input id="f-cap-duree" type="number" min="0" placeholder="20">
+      <label>Capacité d'emprunt estimée</label>
+      <div class="readout" id="cap-emprunt-readout">—</div>
+      <button type="button" class="btn-mini" id="btn-use-capacite">Utiliser ce montant pour le crédit du bien</button>
+      <div class="hint">Estimation classique (mensualité max = revenus × taux d'endettement − charges existantes), à affiner avec votre banque (assurance, autres critères).</div>
+    </div>
     <div class="panel">
       <h2>Nouveau bien</h2>
 
@@ -251,6 +283,7 @@
       <button type="button" class="btn-mini" id="btn-update-secteur">Calculer le prix secteur (base DVF locale)</button>
       <div class="gradbar secteur" id="secteur-bar"><div class="marker" id="secteur-marker" style="left:50%;"></div></div>
       <div class="bar-readout" id="secteur-readout">Ajoutez la surface, le prix et un prix secteur pour comparer.</div>
+      <div id="secteur-history"></div>
       <div class="hint">Valeur pré-remplie = estimation indicative par arrondissement (pas une source officielle). Le calcul automatique s'appuie sur votre propre base de 157 000+ ventes réelles DVF (2021-2025, département 13), chargée une fois puis calculée localement dans votre navigateur — aucun service externe, donc jamais de panne possible. Ajustez la période ci-dessus pour ne garder que les années les plus pertinentes. Vert = bonne affaire, rouge = cher pour le secteur.</div>
 
       <div class="section-lbl">Loyer &amp; charges</div>
@@ -345,18 +378,41 @@
       <button class="btn" id="btn-add">Enregistrer le bien</button>
       <div class="hint" id="form-msg"></div>
     </div>
+    </div>
 
-    <div id="list"></div>
+    <div>
+      <div class="filters-bar" id="filters-bar">
+        <input id="f-search-biens" type="text" placeholder="Rechercher (adresse, commentaire, référence)...">
+        <select id="f-filter-statut">
+          <option value="">Tous statuts</option>
+          <option value="ok">Au-dessus du seuil</option>
+          <option value="no">Sous le seuil</option>
+        </select>
+        <select id="f-filter-type">
+          <option value="">Tous types</option>
+          <option value="Appartement">Appartement</option>
+          <option value="Colocation meublée">Colocation meublée</option>
+          <option value="Immeuble multi-lots">Immeuble multi-lots</option>
+          <option value="Autre">Autre</option>
+        </select>
+        <select id="f-filter-critere"><option value="">Tous critères</option></select>
+      </div>
+      <div id="list"></div>
+    </div>
   </div>
 
   <div class="map-modal" id="map-modal">
     <div class="map-modal-inner">
       <div class="map-modal-header">
         <h3>Carte des biens enregistrés</h3>
-        <button class="btn-mini" id="btn-close-map" type="button">Fermer ✕</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn-mini" id="btn-toggle-heatmap" type="button">Afficher prix/m² du secteur</button>
+          <button class="btn-mini" id="btn-close-map" type="button">Fermer ✕</button>
+        </div>
       </div>
       <div id="map-status">—</div>
       <div id="leaflet-map"></div>
+      <div id="heatmap-legend" style="display:none;"></div>
     </div>
   </div>
 </div>
@@ -588,6 +644,66 @@
     var m = montant * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
     return m;
   }
+  function capaciteEmprunt(mensualiteMax, tauxAnnuel, dureeAns){
+    if(!mensualiteMax || mensualiteMax <= 0 || !dureeAns || dureeAns <= 0) return 0;
+    var n = dureeAns * 12;
+    if(!tauxAnnuel || tauxAnnuel <= 0) return mensualiteMax * n;
+    var r = (tauxAnnuel / 100) / 12;
+    return mensualiteMax * (1 - Math.pow(1 + r, -n)) / r;
+  }
+
+  // ---------- Capacité d'emprunt personnelle ----------
+  var CAP_KEYS = ['f-cap-revenus','f-cap-charges','f-cap-taux-endett','f-cap-taux','f-cap-duree'];
+  var lastCapaciteMontant = 0;
+
+  function updateCapaciteEmprunt(){
+    var revenus = parseFloat(document.getElementById('f-cap-revenus').value) || 0;
+    var chargesExist = parseFloat(document.getElementById('f-cap-charges').value) || 0;
+    var tauxEndett = parseFloat(document.getElementById('f-cap-taux-endett').value) || 35;
+    var taux = parseFloat(document.getElementById('f-cap-taux').value) || 0;
+    var duree = parseFloat(document.getElementById('f-cap-duree').value) || 0;
+    var readout = document.getElementById('cap-emprunt-readout');
+
+    if(revenus <= 0 || duree <= 0){ readout.textContent = '—'; lastCapaciteMontant = 0; return; }
+    var mensualiteMax = Math.max(0, (revenus * tauxEndett / 100) - chargesExist);
+    var montant = capaciteEmprunt(mensualiteMax, taux, duree);
+    lastCapaciteMontant = montant;
+    readout.innerHTML = fmt(montant) + ' € empruntables — mensualité max ' + fmt(mensualiteMax) + ' €/mois sur ' + duree + ' ans';
+  }
+  CAP_KEYS.forEach(function(id){
+    document.getElementById(id).addEventListener('input', function(){
+      updateCapaciteEmprunt();
+      saveCapaciteParams();
+    });
+  });
+  document.getElementById('btn-use-capacite').addEventListener('click', function(){
+    if(lastCapaciteMontant <= 0){ alert("Renseignez d'abord vos revenus et la durée souhaitée."); return; }
+    document.getElementById('f-credit-montant').value = Math.round(lastCapaciteMontant);
+    var tauxCap = document.getElementById('f-cap-taux').value;
+    var dureeCap = document.getElementById('f-cap-duree').value;
+    if(tauxCap) document.getElementById('f-credit-taux').value = tauxCap;
+    if(dureeCap) document.getElementById('f-credit-duree').value = dureeCap;
+    updateCreditReadout();
+    updateRendementLive();
+    updateFiscalLive();
+  });
+  function saveCapaciteParams(){
+    var params = {};
+    CAP_KEYS.forEach(function(id){ params[id] = document.getElementById(id).value; });
+    storageSet('capacite-emprunt-params', JSON.stringify(params));
+  }
+  function loadCapaciteParams(){
+    storageGet('capacite-emprunt-params').then(function(res){
+      if(res && res.value){
+        try{
+          var params = JSON.parse(res.value);
+          CAP_KEYS.forEach(function(id){ if(params[id] !== undefined) document.getElementById(id).value = params[id]; });
+        }catch(e){}
+      }
+      updateCapaciteEmprunt();
+    });
+  }
+
   function updateCreditReadout(){
     var montant = parseFloat(document.getElementById('f-credit-montant').value) || 0;
     var taux = parseFloat(document.getElementById('f-credit-taux').value) || 0;
@@ -709,11 +825,50 @@
 
   var secteurRequestSeq = 0;
 
+  function computeYearlyMedians(lat, lon, radius){
+    return loadDvfData().then(function(data){
+      var byYear = {};
+      DVF_YEARS.forEach(function(y){ byYear[y] = []; });
+      var boxDeg = radius / 70000;
+      for(var i = 0; i < data.length; i++){
+        var r = data[i];
+        if(Math.abs(r.lat - lat) > boxDeg || Math.abs(r.lon - lon) > boxDeg) continue;
+        if(haversineMeters(lat, lon, r.lat, r.lon) > radius) continue;
+        var y = r.d ? r.d.slice(0,4) : '';
+        if(byYear[y]) byYear[y].push(r.pm2);
+      }
+      var result = {};
+      DVF_YEARS.forEach(function(y){ result[y] = byYear[y].length >= 3 ? median(byYear[y]) : null; });
+      return result;
+    });
+  }
+
+  function renderSecteurHistory(yearlyMedians){
+    var container = document.getElementById('secteur-history');
+    var vals = DVF_YEARS.map(function(y){ return yearlyMedians[y]; }).filter(function(v){ return v !== null; });
+    if(vals.length === 0){ container.innerHTML = ''; return; }
+    var max = Math.max.apply(null, vals);
+    var html = '<div class="hist-label">Évolution du prix/m² médian par année (toutes années confondues, même zone)</div>';
+    html += '<div class="hist-bars">';
+    DVF_YEARS.forEach(function(y){
+      var v = yearlyMedians[y];
+      var h = v ? Math.max(4, Math.round((v / max) * 60)) : 2;
+      html += '<div class="hist-col">';
+      html += '<div class="hist-val">' + (v ? fmt(v) : '—') + '</div>';
+      html += '<div class="hist-bar' + (v ? '' : ' empty') + '" style="height:' + h + 'px;"></div>';
+      html += '<div class="hist-yr">' + y + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+    container.innerHTML = html;
+  }
+
   function runSecteurLookup(q, silent){
     if(!q){ if(!silent) alert("Saisissez d'abord une adresse ou un code postal."); return; }
     var note = document.getElementById('secteur-readout');
     var myRequestId = ++secteurRequestSeq;
     note.textContent = 'Recherche dans la base locale (157 000+ ventes)...';
+    document.getElementById('secteur-history').innerHTML = '';
 
     function apply(lat, lon){
       findNearbyComps(lat, lon).then(function(result){
@@ -727,6 +882,10 @@
           var dates = result.comps.map(function(c){ return c.d; }).filter(Boolean).sort();
           var range = dates.length ? (' (' + dates[0].slice(0,4) + '–' + dates[dates.length-1].slice(0,4) + ')') : '';
           note.textContent = 'Mis à jour : ' + fmt(med) + ' €/m² — médiane de ' + result.comps.length + ' ventes réelles dans un rayon de ' + result.radius + 'm' + range + '.';
+          computeYearlyMedians(lat, lon, result.radius).then(function(yearly){
+            if(myRequestId !== secteurRequestSeq) return;
+            renderSecteurHistory(yearly);
+          });
         } else {
           note.textContent = "Pas assez de ventes dans la base locale à proximité (zone peu couverte par le DVF, ou adresse mal reconnue). Vérifiez manuellement si besoin.";
         }
@@ -829,6 +988,87 @@
   });
   document.getElementById('btn-close-map').addEventListener('click', function(){
     document.getElementById('map-modal').classList.remove('open');
+  });
+
+  // ---------- Carte de chaleur des prix DVF par secteur ----------
+  var heatLayer = null;
+  var heatmapVisible = false;
+  var heatmapComputed = null;
+
+  function computeHeatmapData(){
+    if(heatmapComputed) return Promise.resolve(heatmapComputed);
+    return loadDvfData().then(function(data){
+      var groups = {};
+      data.forEach(function(r){
+        if(!r.cp) return;
+        if(!groups[r.cp]) groups[r.cp] = { latSum:0, lonSum:0, count:0, pm2s:[], commune:r.com };
+        var g = groups[r.cp];
+        g.latSum += r.lat; g.lonSum += r.lon; g.count++; g.pm2s.push(r.pm2);
+      });
+      var result = [];
+      Object.keys(groups).forEach(function(cp){
+        var g = groups[cp];
+        if(g.count < 10) return;
+        result.push({ cp: cp, commune: g.commune, lat: g.latSum / g.count, lon: g.lonSum / g.count, median: median(g.pm2s), count: g.count });
+      });
+      heatmapComputed = result;
+      return result;
+    });
+  }
+
+  function heatColor(ratio){
+    var stops = [{r:63,g:107,b:79}, {r:201,g:162,b:39}, {r:166,g:71,b:47}];
+    var pos = Math.max(0, Math.min(1, ratio)) * (stops.length - 1);
+    var i = Math.floor(pos);
+    if(i >= stops.length - 1){ i = stops.length - 2; }
+    var frac = pos - i;
+    var a = stops[i], b = stops[i+1];
+    var r = Math.round(a.r + (b.r - a.r) * frac);
+    var g = Math.round(a.g + (b.g - a.g) * frac);
+    var bl = Math.round(a.b + (b.b - a.b) * frac);
+    return 'rgb(' + r + ',' + g + ',' + bl + ')';
+  }
+
+  function renderHeatmapLegend(min, max){
+    document.getElementById('heatmap-legend').innerHTML =
+      '<span>' + fmt(min) + ' €/m² (moins cher)</span><div class="grad"></div><span>' + fmt(max) + ' €/m² (plus cher)</span>';
+  }
+
+  function renderHeatmap(){
+    if(!heatLayer) heatLayer = L.layerGroup();
+    computeHeatmapData().then(function(zones){
+      heatLayer.clearLayers();
+      if(zones.length === 0) return;
+      var medians = zones.map(function(z){ return z.median; });
+      var min = Math.min.apply(null, medians);
+      var max = Math.max.apply(null, medians);
+      zones.forEach(function(z){
+        var ratio = max > min ? (z.median - min) / (max - min) : 0.5;
+        var color = heatColor(ratio);
+        var circle = L.circle([z.lat, z.lon], { radius: 900, color: color, fillColor: color, fillOpacity: 0.35, weight: 1, opacity: 0.55 });
+        circle.bindPopup('<b>' + esc(z.commune || z.cp) + '</b> (' + z.cp + ')<br>Médiane : ' + fmt(z.median) + ' €/m²<br>' + z.count + ' ventes (2021–2025)');
+        circle.addTo(heatLayer);
+      });
+      renderHeatmapLegend(min, max);
+    });
+  }
+
+  document.getElementById('btn-toggle-heatmap').addEventListener('click', function(){
+    ensureLeafletMap();
+    heatmapVisible = !heatmapVisible;
+    var btn = document.getElementById('btn-toggle-heatmap');
+    var legend = document.getElementById('heatmap-legend');
+    if(heatmapVisible){
+      btn.textContent = 'Masquer prix/m² du secteur';
+      legend.style.display = 'flex';
+      if(!heatLayer){ heatLayer = L.layerGroup(); }
+      heatLayer.addTo(leafletMap);
+      renderHeatmap();
+    } else {
+      btn.textContent = 'Afficher prix/m² du secteur';
+      legend.style.display = 'none';
+      if(heatLayer) leafletMap.removeLayer(heatLayer);
+    }
   });
 
   // ---------- Rendement en direct ----------
@@ -1168,14 +1408,50 @@
     return html;
   }
 
+  function populateCritereFilter(){
+    var sel = document.getElementById('f-filter-critere');
+    var current = sel.value;
+    var all = CRITERES_BASE.concat(customCriteres);
+    sel.innerHTML = '<option value="">Tous critères</option>' + all.map(function(c){
+      return '<option value="' + esc(c) + '">' + esc(c) + '</option>';
+    }).join('');
+    sel.value = current;
+  }
+
   function render(){
     var list = document.getElementById('list');
+    document.getElementById('filters-bar').style.display = biens.length === 0 ? 'none' : 'flex';
     if(biens.length === 0){
       list.innerHTML = '<div class="empty">Aucun bien enregistré pour l\u2019instant.<br>Ajoutez le premier bien repéré via vos alertes.</div>';
       return;
     }
+    populateCritereFilter();
+    var searchQ = (document.getElementById('f-search-biens').value || '').trim().toLowerCase();
+    var filterStatut = document.getElementById('f-filter-statut').value;
+    var filterType = document.getElementById('f-filter-type').value;
+    var filterCritere = document.getElementById('f-filter-critere').value;
+
     var sorted = biens.slice().sort(function(a, b){ return calc(b).brut - calc(a).brut; });
-    list.innerHTML = sorted.map(bienCardHtml).join('');
+    var filtered = sorted.filter(function(b){
+      if(searchQ){
+        var hay = ((b.lieu||'') + ' ' + (b.commentaire||'') + ' MRS-' + String(b.ref).padStart(3,'0')).toLowerCase();
+        if(hay.indexOf(searchQ) === -1) return false;
+      }
+      if(filterStatut){
+        var ok = calc(b).brut >= SSEUIL;
+        if(filterStatut === 'ok' && !ok) return false;
+        if(filterStatut === 'no' && ok) return false;
+      }
+      if(filterType && b.type !== filterType) return false;
+      if(filterCritere && (!b.criteres || b.criteres.indexOf(filterCritere) === -1)) return false;
+      return true;
+    });
+
+    if(filtered.length === 0){
+      list.innerHTML = '<div class="empty">Aucun bien ne correspond à ces filtres.</div>';
+      return;
+    }
+    list.innerHTML = filtered.map(bienCardHtml).join('');
     Array.prototype.forEach.call(list.querySelectorAll('.del'), function(btn){
       btn.addEventListener('click', function(e){
         e.stopPropagation();
@@ -1186,6 +1462,9 @@
       a.addEventListener('click', function(e){ e.stopPropagation(); });
     });
   }
+  ['f-search-biens','f-filter-statut','f-filter-type','f-filter-critere'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', render);
+  });
 
   document.getElementById('list').addEventListener('click', function(e){
     if(e.target.closest('.del') || e.target.closest('a')) return;
@@ -1352,6 +1631,7 @@
   updateFiscalLive();
   updateValorisationLive();
   initAnneeSelects();
+  loadCapaciteParams();
 
   // ---------- Authentification (si Firebase configuré) ----------
   if(firebaseConfigured() && firebaseReady){
