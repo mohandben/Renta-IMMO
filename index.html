@@ -243,10 +243,15 @@
 
       <label>Prix moyen du secteur / de la rue (€/m²)</label>
       <input id="f-prixm2-secteur" type="number" min="0" placeholder="renseigné auto si connu, sinon à saisir">
+      <label>Période des ventes prises en compte</label>
+      <div class="row2">
+        <div><select id="f-annee-min"></select></div>
+        <div><select id="f-annee-max"></select></div>
+      </div>
       <button type="button" class="btn-mini" id="btn-update-secteur">Calculer le prix secteur (base DVF locale)</button>
       <div class="gradbar secteur" id="secteur-bar"><div class="marker" id="secteur-marker" style="left:50%;"></div></div>
       <div class="bar-readout" id="secteur-readout">Ajoutez la surface, le prix et un prix secteur pour comparer.</div>
-      <div class="hint">Valeur pré-remplie = estimation indicative par arrondissement (pas une source officielle). Le calcul automatique s'appuie sur votre propre base de 157 000+ ventes réelles DVF (2021-2025, département 13), chargée une fois puis calculée localement dans votre navigateur — aucun service externe, donc jamais de panne possible. Vert = bonne affaire, rouge = cher pour le secteur.</div>
+      <div class="hint">Valeur pré-remplie = estimation indicative par arrondissement (pas une source officielle). Le calcul automatique s'appuie sur votre propre base de 157 000+ ventes réelles DVF (2021-2025, département 13), chargée une fois puis calculée localement dans votre navigateur — aucun service externe, donc jamais de panne possible. Ajustez la période ci-dessus pour ne garder que les années les plus pertinentes. Vert = bonne affaire, rouge = cher pour le secteur.</div>
 
       <div class="section-lbl">Loyer &amp; charges</div>
       <label>Loyer mensuel HC (hors charges) (€)</label>
@@ -267,8 +272,18 @@
         <div><label>Taux annuel (%)</label><input id="f-credit-taux" type="number" min="0" step="0.05" placeholder="3,80"></div>
         <div><label>Durée (années)</label><input id="f-credit-duree" type="number" min="0" placeholder="20"></div>
       </div>
-      <label>Mensualité estimée</label>
+      <label>Taux assurance emprunteur (%/an sur capital initial)</label>
+      <input id="f-assurance-taux" type="number" min="0" step="0.01" value="0.30">
+      <div class="hint">0,30% est une moyenne de marché courante (assurance sur capital initial). Ajustez si votre banque vous a donné un taux précis.</div>
+
+      <label>Mensualité estimée (crédit + assurance)</label>
       <div class="readout" id="credit-readout">— €/mois</div>
+      <div class="stats" style="margin-top:10px;">
+        <div class="stat"><div class="k">Total remboursé (crédit)</div><div class="v small" id="credit-total-rembourse">—</div></div>
+        <div class="stat"><div class="k">Dont intérêts totaux</div><div class="v small" id="credit-total-interets">—</div></div>
+        <div class="stat"><div class="k">Coût total assurance</div><div class="v small" id="credit-total-assurance">—</div></div>
+        <div class="stat"><div class="k">Coût total du crédit</div><div class="v small" id="credit-cout-total">—</div></div>
+      </div>
 
       <div class="section-lbl">Rendement en direct</div>
       <div class="stats" style="margin-top:0;">
@@ -577,9 +592,35 @@
     var montant = parseFloat(document.getElementById('f-credit-montant').value) || 0;
     var taux = parseFloat(document.getElementById('f-credit-taux').value) || 0;
     var duree = parseFloat(document.getElementById('f-credit-duree').value) || 0;
+    var tauxAssurance = parseFloat(document.getElementById('f-assurance-taux').value) || 0;
     var m = mensualite(montant, taux, duree);
-    document.getElementById('credit-readout').textContent = m > 0 ? fmt(m) + ' €/mois' : '— €/mois';
+    var n = duree > 0 ? duree * 12 : 0;
+    var mensualiteAssurance = montant * (tauxAssurance / 100) / 12;
+    var mensualiteTotale = m + mensualiteAssurance;
+
+    document.getElementById('credit-readout').textContent = mensualiteTotale > 0
+      ? fmt(mensualiteTotale) + ' €/mois (dont ' + fmt(mensualiteAssurance) + '€ assurance)'
+      : '— €/mois';
+
+    if(m > 0 && n > 0){
+      var totalRembourse = m * n;
+      var totalInterets = totalRembourse - montant;
+      var totalAssurance = mensualiteAssurance * n;
+      var coutTotal = totalInterets + totalAssurance;
+      document.getElementById('credit-total-rembourse').textContent = fmt(totalRembourse) + '€';
+      document.getElementById('credit-total-interets').textContent = fmt(totalInterets) + '€';
+      document.getElementById('credit-total-assurance').textContent = fmt(totalAssurance) + '€';
+      document.getElementById('credit-cout-total').textContent = fmt(coutTotal) + '€';
+    } else {
+      ['credit-total-rembourse','credit-total-interets','credit-total-assurance','credit-cout-total'].forEach(function(id){
+        document.getElementById(id).textContent = '—';
+      });
+    }
   }
+  document.getElementById('f-assurance-taux').addEventListener('input', function(){
+    updateCreditReadout();
+    updateRendementLive();
+  });
   document.getElementById('btn-fill-credit').addEventListener('click', function(){
     var prix = parseFloat(document.getElementById('f-prix').value) || 0;
     document.getElementById('f-credit-montant').value = prix;
@@ -604,6 +645,34 @@
     return dvfLoadPromise;
   }
 
+  var DVF_YEARS = ['2021','2022','2023','2024','2025'];
+
+  function getAnneeRange(){
+    var min = document.getElementById('f-annee-min').value || DVF_YEARS[0];
+    var max = document.getElementById('f-annee-max').value || DVF_YEARS[DVF_YEARS.length-1];
+    if(min > max){ var t = min; min = max; max = t; }
+    return { min: min, max: max };
+  }
+
+  function initAnneeSelects(){
+    var selMin = document.getElementById('f-annee-min');
+    var selMax = document.getElementById('f-annee-max');
+    DVF_YEARS.forEach(function(y){
+      var o1 = document.createElement('option'); o1.value = y; o1.textContent = 'Depuis ' + y;
+      selMin.appendChild(o1);
+      var o2 = document.createElement('option'); o2.value = y; o2.textContent = "Jusqu'à " + y;
+      selMax.appendChild(o2);
+    });
+    selMin.value = DVF_YEARS[0];
+    selMax.value = DVF_YEARS[DVF_YEARS.length - 1];
+    [selMin, selMax].forEach(function(sel){
+      sel.addEventListener('change', function(){
+        var q = (lieuInput.value || '').trim();
+        if(q){ runSecteurLookup(q, true); }
+      });
+    });
+  }
+
   function haversineMeters(lat1, lon1, lat2, lon2){
     var R = 6371000;
     var toRad = function(d){ return d * Math.PI / 180; };
@@ -616,6 +685,7 @@
 
   function findNearbyComps(lat, lon){
     return loadDvfData().then(function(data){
+      var range = getAnneeRange();
       var radii = [500, 800, 1200, 2000, 3000];
       for(var ri = 0; ri < radii.length; ri++){
         var radius = radii[ri];
@@ -623,6 +693,8 @@
         var comps = [];
         for(var i = 0; i < data.length; i++){
           var r = data[i];
+          var y = r.d ? r.d.slice(0,4) : '';
+          if(y < range.min || y > range.max) continue;
           if(Math.abs(r.lat - lat) > boxDeg || Math.abs(r.lon - lon) > boxDeg) continue;
           var dist = haversineMeters(lat, lon, r.lat, r.lon);
           if(dist <= radius){ comps.push(r); }
@@ -947,7 +1019,11 @@
       loyer: b.loyer || 0,
       chargesRecup: b.chargesRecup || 0,
       chargesNonRecup: (b.chargesNonRecup !== undefined) ? b.chargesNonRecup : (b.charges || 0),
-      credit: b.credit || {montant:0, taux:0, duree:0},
+      credit: (function(){
+        var c = b.credit || {montant:0, taux:0, duree:0};
+        if(c.assurance === undefined) c.assurance = 0.30;
+        return c;
+      })(),
       fiscal: b.fiscal || {tmi:11, fraisCompta:0, mobilier:0, terrainPct:15, dureeBien:25, dureeMobilier:7, dureeTravaux:10},
       valorisationTaux: (b.valorisationTaux !== undefined) ? b.valorisationTaux : 2,
       commentaire: b.commentaire || '',
@@ -1219,6 +1295,7 @@
     var creditMontant = parseFloat(document.getElementById('f-credit-montant').value) || 0;
     var creditTaux = parseFloat(document.getElementById('f-credit-taux').value) || 0;
     var creditDuree = parseFloat(document.getElementById('f-credit-duree').value) || 0;
+    var creditAssurance = parseFloat(document.getElementById('f-assurance-taux').value) || 0;
     var commentaire = document.getElementById('f-commentaire').value.trim();
     var criteres = Object.keys(selectedCriteres);
     var fiscal = readFiscalInputs();
@@ -1235,7 +1312,7 @@
     var bien = {
       id: Date.now(), ref: refCounter, lieu: lieu, lat: selectedLat, lon: selectedLon, lien: lien, type: type, surface: surface, prix: prix, notaire: notaire,
       prixM2Secteur: prixM2Secteur, travaux: travaux, loyer: loyer, chargesRecup: chargesRecup, chargesNonRecup: chargesNonRecup,
-      credit: {montant: creditMontant, taux: creditTaux, duree: creditDuree},
+      credit: {montant: creditMontant, taux: creditTaux, duree: creditDuree, assurance: creditAssurance},
       fiscal: fiscal, valorisationTaux: valorisationTaux,
       commentaire: commentaire, criteres: criteres
     };
@@ -1249,6 +1326,7 @@
      'f-frais-compta','f-mobilier','f-commentaire'].forEach(function(id){
       document.getElementById(id).value = '';
     });
+    document.getElementById('f-assurance-taux').value = '0.30';
     document.getElementById('f-tmi').value = '11';
     document.getElementById('f-terrain-pct').value = '15';
     document.getElementById('f-duree-bien').value = '25';
@@ -1273,6 +1351,7 @@
   updateRendementLive();
   updateFiscalLive();
   updateValorisationLive();
+  initAnneeSelects();
 
   // ---------- Authentification (si Firebase configuré) ----------
   if(firebaseConfigured() && firebaseReady){
