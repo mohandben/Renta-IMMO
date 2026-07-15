@@ -166,7 +166,7 @@
   .map-modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
   .map-modal-header h3{font-family:'Zilla Slab',serif;font-size:17px;margin:0;font-weight:600;}
   #leaflet-map{flex:1;border:1px solid var(--ink-soft);min-height:200px;}
-  #heatmap-legend{display:flex;align-items:center;gap:10px;margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-soft);}
+  #heatmap-legend{display:flex;align-items:center;gap:10px;margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-soft);flex-wrap:wrap;}
   #heatmap-legend .grad{width:140px;height:8px;background:linear-gradient(90deg, #3F6B4F 0%, #C9A227 50%, #A6472F 100%);}
   #map-status{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);margin-bottom:8px;}
 
@@ -1017,7 +1017,14 @@
   }
 
   function heatColor(ratio){
-    var stops = [{r:63,g:107,b:79}, {r:201,g:162,b:39}, {r:166,g:71,b:47}];
+    // Palette 5 tons, plus saturée aux extrémités pour un vrai contraste visuel
+    var stops = [
+      {r:27,  g:94,  b:58},   // vert foncé — très bon prix
+      {r:139, g:191, b:100},  // vert clair
+      {r:217, g:178, b:60},   // or — prix moyen
+      {r:201, g:112, b:45},   // orange
+      {r:139, g:46,  b:31}    // rouge foncé — cher
+    ];
     var pos = Math.max(0, Math.min(1, ratio)) * (stops.length - 1);
     var i = Math.floor(pos);
     if(i >= stops.length - 1){ i = stops.length - 2; }
@@ -1029,9 +1036,18 @@
     return 'rgb(' + r + ',' + g + ',' + bl + ')';
   }
 
-  function renderHeatmapLegend(min, max){
+  function percentile(arr, p){
+    var s = arr.slice().sort(function(a, b){ return a - b; });
+    var idx = (p / 100) * (s.length - 1);
+    var lo = Math.floor(idx), hi = Math.ceil(idx);
+    if(lo === hi) return s[lo];
+    return s[lo] + (s[hi] - s[lo]) * (idx - lo);
+  }
+
+  function renderHeatmapLegend(low, high){
     document.getElementById('heatmap-legend').innerHTML =
-      '<span>' + fmt(min) + ' €/m² (moins cher)</span><div class="grad"></div><span>' + fmt(max) + ' €/m² (plus cher)</span>';
+      '<span>≤ ' + fmt(low) + ' €/m²</span><div class="grad"></div><span>≥ ' + fmt(high) + ' €/m²</span>' +
+      '<span style="margin-left:8px;">(échelle basée sur les 10e-90e percentiles du département)</span>';
   }
 
   function renderHeatmap(){
@@ -1040,16 +1056,18 @@
       heatLayer.clearLayers();
       if(zones.length === 0) return;
       var medians = zones.map(function(z){ return z.median; });
-      var min = Math.min.apply(null, medians);
-      var max = Math.max.apply(null, medians);
+      // Percentiles plutôt que min/max : évite que quelques zones rurales très bon marché
+      // n'écrasent visuellement les écarts entre arrondissements marseillais, plus resserrés.
+      var low = percentile(medians, 10);
+      var high = percentile(medians, 90);
       zones.forEach(function(z){
-        var ratio = max > min ? (z.median - min) / (max - min) : 0.5;
+        var ratio = high > low ? (z.median - low) / (high - low) : 0.5;
         var color = heatColor(ratio);
-        var circle = L.circle([z.lat, z.lon], { radius: 900, color: color, fillColor: color, fillOpacity: 0.35, weight: 1, opacity: 0.55 });
+        var circle = L.circle([z.lat, z.lon], { radius: 900, color: '#fff', fillColor: color, fillOpacity: 0.55, weight: 1.5, opacity: 0.8 });
         circle.bindPopup('<b>' + esc(z.commune || z.cp) + '</b> (' + z.cp + ')<br>Médiane : ' + fmt(z.median) + ' €/m²<br>' + z.count + ' ventes (2021–2025)');
         circle.addTo(heatLayer);
       });
-      renderHeatmapLegend(min, max);
+      renderHeatmapLegend(low, high);
     });
   }
 
