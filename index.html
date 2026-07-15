@@ -182,6 +182,103 @@
   #app-root.ready{display:block;}
   .btn-logout{background:none;border:1px solid var(--ink-soft);color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;font-size:9.5px;padding:6px 10px;cursor:pointer;text-transform:uppercase;}
   .btn-logout:hover{border-color:var(--caution);color:var(--caution);}
+
+  /* ==================== Design adouci (v4) ==================== */
+  .panel, .bien, .btn, .btn-mini, .btn-mail, .btn-logout, .readout, .gradbar,
+  input, select, textarea, .m2badge, .suggestions, .filters-bar input, .filters-bar select,
+  .map-modal-inner, .login-box{ border-radius:6px; }
+  .panel, .bien{ box-shadow:0 1px 3px rgba(31,46,53,0.08), 0 1px 2px rgba(31,46,53,0.06); }
+  .btn:hover, .btn-mail:hover{ box-shadow:0 2px 6px rgba(184,134,58,0.35); }
+  .gauge-marker{ border-radius:50%; }
+  .del{ border-radius:6px; }
+
+  /* ==================== Page d'accueil ==================== */
+  .view{ display:none; }
+  .view#view-home.active, .view#view-wizard.active{ display:block; }
+
+  .home-hero{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:20px; }
+  .hero-stat{ flex:1; min-width:140px; background:rgba(255,255,255,0.65); border:1px solid var(--ink); border-radius:8px; padding:16px 18px; box-shadow:0 1px 3px rgba(31,46,53,0.08); }
+  .hero-v{ font-family:'Zilla Slab',serif; font-size:28px; font-weight:700; color:var(--ink); }
+  .hero-k{ font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase; color:var(--ink-soft); letter-spacing:0.5px; margin-top:2px; }
+
+  .fab{
+    position:fixed; right:24px; bottom:24px; width:60px; height:60px; border-radius:50%;
+    background:var(--gold); color:var(--paper); border:none; font-size:30px; line-height:1;
+    box-shadow:0 4px 14px rgba(184,134,58,0.5); cursor:pointer; z-index:500;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .fab:hover{ background:var(--ink); transform:scale(1.05); }
+
+  /* ==================== Vue tableau ==================== */
+  .table-view-wrap{ overflow-x:auto; border:1px solid var(--ink); border-radius:8px; background:rgba(255,255,255,0.6); }
+  table.biens-table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.biens-table th{ font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.4px; color:var(--ink-soft); text-align:left; padding:10px 12px; border-bottom:2px solid var(--ink); white-space:nowrap; }
+  table.biens-table td{ padding:9px 12px; border-bottom:1px solid var(--paper-line); white-space:nowrap; }
+  table.biens-table tr:hover td{ background:rgba(255,255,255,0.5); }
+  table.biens-table .tt-ok{ color:var(--positive); font-weight:600; }
+  table.biens-table .tt-no{ color:var(--caution); font-weight:600; }
+  table.biens-table button{ font-family:'IBM Plex Mono',monospace; font-size:9.5px; padding:3px 7px; border-radius:5px; border:1px solid var(--ink-soft); background:none; color:var(--ink-soft); cursor:pointer; }
+  table.biens-table button:hover{ border-color:var(--gold); color:var(--gold); }
+
+  /* ==================== Toast (annuler suppression) ==================== */
+  .toast{
+    position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(20px);
+    background:var(--ink); color:var(--paper); padding:12px 18px; border-radius:8px;
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px; display:flex; align-items:center; gap:14px;
+    box-shadow:0 4px 16px rgba(0,0,0,0.25); z-index:900; opacity:0; pointer-events:none; transition:opacity 0.25s, transform 0.25s;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto; }
+  .toast button{ background:var(--gold); color:var(--ink); border:none; padding:5px 10px; border-radius:5px; font-family:'IBM Plex Mono',monospace; font-size:11px; cursor:pointer; text-transform:uppercase; }
+
+  /* ==================== Parcours en étapes (wizard) ==================== */
+  #view-wizard{ max-width:640px; margin:0 auto; }
+  .wizard-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; gap:10px; flex-wrap:wrap; }
+  .btn-back{ background:none; border:1px solid var(--ink-soft); color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; font-size:11px; padding:8px 12px; border-radius:6px; cursor:pointer; text-transform:uppercase; min-height:40px; }
+  .btn-back:hover{ border-color:var(--gold); color:var(--gold); }
+  .wizard-title{ font-family:'Zilla Slab',serif; font-size:20px; font-weight:700; }
+  .wizard-progress-bar{ height:6px; background:var(--paper-line); border-radius:3px; overflow:hidden; margin-bottom:4px; }
+  .wizard-progress-fill{ height:100%; background:var(--gold); border-radius:3px; transition:width 0.3s ease; width:14.3%; }
+  .wizard-progress-text{ font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:16px; }
+
+  .wizard-summary{ display:flex; gap:10px; margin-bottom:18px; position:sticky; top:0; z-index:5; }
+  .ws-item{ flex:1; background:rgba(255,255,255,0.75); border:1px solid var(--ink); border-radius:8px; padding:10px 12px; text-align:center; box-shadow:0 1px 3px rgba(31,46,53,0.08); }
+  .ws-k{ font-family:'IBM Plex Mono',monospace; font-size:9px; text-transform:uppercase; color:var(--ink-soft); letter-spacing:0.4px; }
+  .ws-v{ font-family:'Zilla Slab',serif; font-size:18px; font-weight:700; margin-top:2px; }
+  .ws-v.positive{ color:var(--positive); }
+  .ws-v.caution{ color:var(--caution); }
+
+  .wizard-body{ min-height:340px; }
+  .wizard-step{ display:none; animation:wizardFadeIn 0.25s ease; }
+  .wizard-step.active{ display:block; }
+  @keyframes wizardFadeIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:translateY(0); } }
+
+  .wizard-nav{ display:flex; gap:10px; margin-top:16px; }
+  .btn-wizard-prev, .btn-wizard-next, .btn-wizard-save{
+    flex:1; padding:14px; font-family:'IBM Plex Mono',monospace; font-size:12.5px; letter-spacing:0.5px;
+    text-transform:uppercase; border-radius:8px; cursor:pointer; min-height:48px;
+  }
+  .btn-wizard-prev{ background:none; border:1px solid var(--ink-soft); color:var(--ink-soft); }
+  .btn-wizard-prev:hover{ border-color:var(--gold); color:var(--gold); }
+  .btn-wizard-prev:disabled{ opacity:0.35; cursor:default; }
+  .btn-wizard-next, .btn-wizard-save{ background:var(--ink); color:var(--paper); border:none; }
+  .btn-wizard-next:hover, .btn-wizard-save:hover{ background:var(--gold); }
+
+  /* ==================== Bouton dupliquer ==================== */
+  .btn-duplicate{ background:none; border:1px solid var(--ink-soft); color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; font-size:10px; padding:5px 8px; cursor:pointer; border-radius:6px; }
+  .btn-duplicate:hover{ border-color:var(--positive); color:var(--positive); }
+
+  /* ==================== Tactile mobile ==================== */
+  @media (max-width:600px){
+    .app{ padding:16px; }
+    input, select, textarea, button{ min-height:42px; }
+    .btn-mini{ min-height:36px; padding:8px 10px; }
+    .masthead-right{ width:100%; }
+    .btn-mail, .btn-logout{ flex:1; min-width:0; }
+    .home-hero{ flex-direction:column; }
+    .fab{ width:56px; height:56px; font-size:26px; right:16px; bottom:16px; }
+    #view-wizard{ max-width:100%; }
+    .wizard-summary{ position:static; }
+  }
 </style>
 
 <div class="login-screen" id="login-screen">
@@ -198,49 +295,79 @@
 </div>
 
 <div class="app" id="app-root">
-  <div class="masthead">
-    <div>
-      <h1>Registre de rentabilité</h1>
-      <div class="sub">Marseille &amp; alentours — biens &lt; 200 000€</div>
-    </div>
-    <div class="masthead-right">
-      <button class="btn-logout" id="btn-logout" type="button" style="display:none;">Déconnexion</button>
-      <button class="btn-mail" id="btn-map" type="button">Carte</button>
-      <button class="btn-mail" id="btn-export-excel" type="button">Exporter en Excel</button>
-      <button class="btn-mail" id="btn-mail" type="button">Envoyer par mail</button>
-      <div class="seuil-edit">
-        <div class="lbl">Seuil ciblé</div>
-        <div class="row">
-          <input id="f-seuil" type="number" min="0" step="0.1" value="8">
-          <span class="pct">%</span>
+  <div id="view-home" class="view active">
+    <div class="masthead">
+      <div>
+        <h1>Registre de rentabilité</h1>
+        <div class="sub" id="home-subtitle">Marseille &amp; alentours — biens &lt; 200 000€</div>
+      </div>
+      <div class="masthead-right">
+        <button class="btn-logout" id="btn-logout" type="button" style="display:none;">Déconnexion</button>
+        <button class="btn-mail" id="btn-capacite" type="button">Capacité d'emprunt</button>
+        <button class="btn-mail" id="btn-map" type="button">Carte</button>
+        <button class="btn-mail" id="btn-export-excel" type="button">Exporter en Excel</button>
+        <button class="btn-mail" id="btn-mail" type="button">Envoyer par mail</button>
+        <div class="seuil-edit">
+          <div class="lbl">Seuil ciblé</div>
+          <div class="row">
+            <input id="f-seuil" type="number" min="0" step="0.1" value="8">
+            <span class="pct">%</span>
+          </div>
         </div>
       </div>
     </div>
+
+    <div class="home-hero" id="home-hero">
+      <div class="hero-stat"><div class="hero-v" id="hero-count">0</div><div class="hero-k">bien(s) enregistré(s)</div></div>
+      <div class="hero-stat"><div class="hero-v" id="hero-best">—</div><div class="hero-k">meilleur rendement brut</div></div>
+      <div class="hero-stat"><div class="hero-v" id="hero-cashflow">—</div><div class="hero-k">cash-flow total /mois</div></div>
+    </div>
+
+    <div class="filters-bar" id="filters-bar">
+      <input id="f-search-biens" type="text" placeholder="Rechercher (adresse, commentaire, référence)...">
+      <select id="f-filter-statut">
+        <option value="">Tous statuts</option>
+        <option value="ok">Au-dessus du seuil</option>
+        <option value="no">Sous le seuil</option>
+      </select>
+      <select id="f-filter-type">
+        <option value="">Tous types</option>
+        <option value="Appartement">Appartement</option>
+        <option value="Colocation meublée">Colocation meublée</option>
+        <option value="Immeuble multi-lots">Immeuble multi-lots</option>
+        <option value="Autre">Autre</option>
+      </select>
+      <select id="f-filter-critere"><option value="">Tous critères</option></select>
+      <button type="button" class="btn-mini" id="btn-toggle-view">Vue tableau</button>
+    </div>
+    <div id="list"></div>
+    <div id="table-view" style="display:none;"></div>
+
+    <button type="button" class="fab" id="btn-new-bien" title="Ajouter un bien">+</button>
   </div>
 
-  <div class="layout">
-    <div class="left-col">
-    <div class="panel">
-      <h2>Capacité d'emprunt</h2>
-      <label>Revenus nets mensuels du foyer (€)</label>
-      <input id="f-cap-revenus" type="number" min="0" placeholder="3500">
-      <label>Charges de crédit existantes /mois (€)</label>
-      <input id="f-cap-charges" type="number" min="0" placeholder="0">
-      <div class="row2">
-        <div><label>Taux d'endettement max (%)</label><input id="f-cap-taux-endett" type="number" min="0" max="100" value="35"></div>
-        <div><label>Taux annuel emprunt (%)</label><input id="f-cap-taux" type="number" min="0" step="0.05" placeholder="3,80"></div>
-      </div>
-      <label>Durée souhaitée (années)</label>
-      <input id="f-cap-duree" type="number" min="0" placeholder="20">
-      <label>Capacité d'emprunt estimée</label>
-      <div class="readout" id="cap-emprunt-readout">—</div>
-      <button type="button" class="btn-mini" id="btn-use-capacite">Utiliser ce montant pour le crédit du bien</button>
-      <div class="hint">Estimation classique (mensualité max = revenus × taux d'endettement − charges existantes), à affiner avec votre banque (assurance, autres critères).</div>
-    </div>
-    <div class="panel">
-      <h2>Nouveau bien</h2>
+  <div class="toast" id="undo-toast">
+    <span>Bien supprimé.</span>
+    <button type="button" id="btn-undo-delete">Annuler</button>
+  </div>
 
-      <div class="section-lbl">Localisation</div>
+<div id="view-wizard" class="view">
+  <div class="wizard-header">
+    <button type="button" class="btn-back" id="btn-wizard-back">← Retour</button>
+    <div class="wizard-title" id="wizard-title">Localisation</div>
+  </div>
+  <div class="wizard-progress-bar"><div class="wizard-progress-fill" id="wizard-progress-fill"></div></div>
+  <div class="wizard-progress-text" id="wizard-progress-text">Étape 1/7</div>
+
+  <div class="wizard-summary" id="wizard-summary">
+    <div class="ws-item"><div class="ws-k">Rendement brut</div><div class="ws-v" id="ws-brut">—</div></div>
+    <div class="ws-item"><div class="ws-k">Rendement net</div><div class="ws-v" id="ws-net">—</div></div>
+    <div class="ws-item"><div class="ws-k">Cash-flow</div><div class="ws-v" id="ws-cashflow">—</div></div>
+  </div>
+
+  <div class="panel wizard-body" id="wizard-body">
+    <div class="wizard-step" data-step="0">
+<div class="section-lbl">Localisation</div>
       <label>Adresse ou code postal</label>
       <div class="autocomplete-wrap">
         <input id="f-lieu" type="text" placeholder="ex. Chutes Lavie, 13004 Marseille" autocomplete="off">
@@ -354,7 +481,9 @@
       <label>Lien de l'annonce</label>
       <input id="f-lien" type="url" placeholder="https://...">
 
-      <div class="section-lbl">Bien</div>
+          </div>
+    <div class="wizard-step" data-step="1">
+<div class="section-lbl">Bien</div>
       <label>Type de bien</label>
       <select id="f-type">
         <option>Appartement</option>
@@ -389,7 +518,9 @@
       <div id="secteur-history"></div>
       <div class="hint">Valeur pré-remplie = estimation indicative par arrondissement (pas une source officielle). Le calcul automatique s'appuie sur votre propre base de ventes réelles DVF (2021-2025), chargée département par département à la demande selon l'adresse saisie — aucun service externe, donc jamais de panne possible. Département 13 disponible ; les autres s'ajoutent sur demande. Ajustez la période ci-dessus pour ne garder que les années les plus pertinentes. Vert = bonne affaire, rouge = cher pour le secteur.</div>
 
-      <div class="section-lbl">Loyer &amp; charges</div>
+          </div>
+    <div class="wizard-step" data-step="2">
+<div class="section-lbl">Loyer &amp; charges</div>
       <label>Loyer mensuel HC (hors charges) (€)</label>
       <input id="f-loyer" type="number" min="0" placeholder="850">
 
@@ -399,7 +530,9 @@
       </div>
       <div class="hint">Récupérables = provisions remboursées par le locataire. Non récupérables = à la charge du propriétaire (taxe foncière, assurance PNO, gestion, copro non récup.).</div>
 
-      <div class="section-lbl">Financement (optionnel)</div>
+          </div>
+    <div class="wizard-step" data-step="3">
+<div class="section-lbl">Financement (optionnel)</div>
       <label>Montant à emprunter (€)</label>
       <input id="f-credit-montant" type="number" min="0" placeholder="0">
       <button type="button" class="btn-mini" id="btn-fill-credit">Utiliser le prix d'achat</button>
@@ -433,7 +566,9 @@
       </div>
       <div class="bar-readout" id="rendement-readout">Renseignez le prix et le loyer pour voir le rendement.</div>
 
-      <div class="section-lbl">Fiscalité (LMNP réel)</div>
+          </div>
+    <div class="wizard-step" data-step="4">
+<div class="section-lbl">Fiscalité (LMNP réel)</div>
       <div class="row2">
         <div><label>TMI</label>
           <select id="f-tmi">
@@ -461,13 +596,17 @@
       <div class="readout" id="fiscal-readout">—</div>
       <div class="hint">Estimation simplifiée en régime de croisière (intérêts d'emprunt non dégressifs, amortissement linéaire, prélèvements sociaux 17,2% inclus) — ne remplace pas un comptable LMNP.</div>
 
-      <div class="section-lbl">Projection de valeur</div>
+          </div>
+    <div class="wizard-step" data-step="5">
+<div class="section-lbl">Projection de valeur</div>
       <label>Taux de valorisation annuel estimé (%)</label>
       <input id="f-valorisation-taux" type="number" min="0" step="0.1" value="2">
       <div class="readout" id="valorisation-readout" style="line-height:1.9;">—</div>
       <div class="hint">Basée en priorité sur (prix secteur/rue × surface) si renseignés, sinon sur (prix d'achat + travaux) par défaut. Intérêts composés — ne tient pas compte de l'inflation, du marché futur, ni des frais de revente.</div>
 
-      <div class="section-lbl">Critères</div>
+          </div>
+    <div class="wizard-step" data-step="6">
+<div class="section-lbl">Critères</div>
       <div class="crit-grid" id="crit-grid"></div>
       <div class="crit-add">
         <input id="f-critere-custom" type="text" placeholder="Ajouter un critère...">
@@ -478,29 +617,40 @@
       <label>Commentaire libre</label>
       <textarea id="f-commentaire" placeholder="Vos notes pour retrouver ce bien plus tard..."></textarea>
 
-      <button class="btn" id="btn-add">Enregistrer le bien</button>
-      <div class="hint" id="form-msg"></div>
     </div>
-    </div>
+  </div>
 
-    <div>
-      <div class="filters-bar" id="filters-bar">
-        <input id="f-search-biens" type="text" placeholder="Rechercher (adresse, commentaire, référence)...">
-        <select id="f-filter-statut">
-          <option value="">Tous statuts</option>
-          <option value="ok">Au-dessus du seuil</option>
-          <option value="no">Sous le seuil</option>
-        </select>
-        <select id="f-filter-type">
-          <option value="">Tous types</option>
-          <option value="Appartement">Appartement</option>
-          <option value="Colocation meublée">Colocation meublée</option>
-          <option value="Immeuble multi-lots">Immeuble multi-lots</option>
-          <option value="Autre">Autre</option>
-        </select>
-        <select id="f-filter-critere"><option value="">Tous critères</option></select>
+  <div class="hint" id="form-msg" style="max-width:640px;margin-left:auto;margin-right:auto;"></div>
+
+  <div class="wizard-nav">
+    <button type="button" class="btn-wizard-prev" id="btn-wizard-prev">◀ Précédent</button>
+    <button type="button" class="btn-wizard-next" id="btn-wizard-next">Suivant ▶</button>
+    <button class="btn-wizard-save" id="btn-add" style="display:none;">✓ Enregistrer le bien</button>
+  </div>
+</div>
+
+  <div class="map-modal" id="capacite-modal">
+    <div class="map-modal-inner" style="height:auto;max-height:86vh;">
+      <div class="map-modal-header">
+        <h3>Capacité d'emprunt</h3>
+        <button class="btn-mini" id="btn-close-capacite" type="button">Fermer ✕</button>
       </div>
-      <div id="list"></div>
+      <div style="overflow-y:auto;">
+      <label>Revenus nets mensuels du foyer (€)</label>
+      <input id="f-cap-revenus" type="number" min="0" placeholder="3500">
+      <label>Charges de crédit existantes /mois (€)</label>
+      <input id="f-cap-charges" type="number" min="0" placeholder="0">
+      <div class="row2">
+        <div><label>Taux d'endettement max (%)</label><input id="f-cap-taux-endett" type="number" min="0" max="100" value="35"></div>
+        <div><label>Taux annuel emprunt (%)</label><input id="f-cap-taux" type="number" min="0" step="0.05" placeholder="3,80"></div>
+      </div>
+      <label>Durée souhaitée (années)</label>
+      <input id="f-cap-duree" type="number" min="0" placeholder="20">
+      <label>Capacité d'emprunt estimée</label>
+      <div class="readout" id="cap-emprunt-readout">—</div>
+      <button type="button" class="btn-mini" id="btn-use-capacite">Utiliser ce montant pour le crédit du bien</button>
+      <div class="hint">Estimation classique (mensualité max = revenus × taux d'endettement − charges existantes), à affiner avec votre banque (assurance, autres critères).</div>
+      </div>
     </div>
   </div>
 
@@ -1348,6 +1498,168 @@
     readout.innerHTML = baseNote + '<br>' + [5,10,15,20,25].map(function(h){ return h + ' ans : <b>' + fmt(vals[h]) + '€</b>'; }).join('<br>');
   }
 
+  // ==================== Navigation entre vues (accueil / parcours) ====================
+  var WIZARD_STEP_TITLES = ["Localisation", "Caractéristiques du bien", "Loyer & charges", "Financement", "Fiscalité (LMNP)", "Projection de valeur", "Critères & notes"];
+  var wizardStep = 0;
+  var wizardEditMode = false; // false = nouvel ajout, true = pré-rempli depuis un doublon
+
+  function showView(name){
+    document.getElementById('view-home').classList.toggle('active', name === 'home');
+    document.getElementById('view-wizard').classList.toggle('active', name === 'wizard');
+    window.scrollTo(0, 0);
+  }
+
+  function goToWizardStep(n){
+    n = Math.max(0, Math.min(WIZARD_STEP_TITLES.length - 1, n));
+    wizardStep = n;
+    Array.prototype.forEach.call(document.querySelectorAll('.wizard-step'), function(el){
+      el.classList.toggle('active', parseInt(el.getAttribute('data-step'), 10) === n);
+    });
+    document.getElementById('wizard-title').textContent = WIZARD_STEP_TITLES[n];
+    document.getElementById('wizard-progress-text').textContent = 'Étape ' + (n + 1) + '/' + WIZARD_STEP_TITLES.length;
+    document.getElementById('wizard-progress-fill').style.width = (((n + 1) / WIZARD_STEP_TITLES.length) * 100) + '%';
+    document.getElementById('btn-wizard-prev').disabled = (n === 0);
+    var isLast = (n === WIZARD_STEP_TITLES.length - 1);
+    document.getElementById('btn-wizard-next').style.display = isLast ? 'none' : '';
+    document.getElementById('btn-add').style.display = isLast ? '' : 'none';
+    window.scrollTo(0, 0);
+  }
+
+  function openWizard(){
+    wizardEditMode = false;
+    goToWizardStep(0);
+    showView('wizard');
+  }
+
+  document.getElementById('btn-new-bien').addEventListener('click', function(){
+    openWizard();
+  });
+  document.getElementById('btn-wizard-back').addEventListener('click', function(){
+    showView('home');
+  });
+  document.getElementById('btn-wizard-next').addEventListener('click', function(){
+    goToWizardStep(wizardStep + 1);
+  });
+  document.getElementById('btn-wizard-prev').addEventListener('click', function(){
+    goToWizardStep(wizardStep - 1);
+  });
+
+  // ---------- Modal Capacité d'emprunt ----------
+  document.getElementById('btn-capacite').addEventListener('click', function(){
+    document.getElementById('capacite-modal').classList.add('open');
+  });
+  document.getElementById('btn-close-capacite').addEventListener('click', function(){
+    document.getElementById('capacite-modal').classList.remove('open');
+  });
+
+  // ---------- Vue tableau / cartes ----------
+  var listViewMode = 'cards';
+  document.getElementById('btn-toggle-view').addEventListener('click', function(){
+    listViewMode = (listViewMode === 'cards') ? 'table' : 'cards';
+    document.getElementById('btn-toggle-view').textContent = listViewMode === 'cards' ? 'Vue tableau' : 'Vue cartes';
+    document.getElementById('list').style.display = listViewMode === 'cards' ? '' : 'none';
+    document.getElementById('table-view').style.display = listViewMode === 'table' ? '' : 'none';
+    render();
+  });
+
+  function tableViewHtml(filtered){
+    if(filtered.length === 0) return '<div class="empty">Aucun bien ne correspond à ces filtres.</div>';
+    var rows = filtered.map(function(b){
+      var c = calc(b);
+      var ok = c.brut >= SSEUIL;
+      return '<tr data-id="' + b.id + '">' +
+        '<td>MRS-' + String(b.ref).padStart(3,'0') + '</td>' +
+        '<td>' + esc(b.lieu || '—') + '</td>' +
+        '<td>' + esc(b.type) + '</td>' +
+        '<td>' + fmt(b.prix) + '€</td>' +
+        '<td class="' + (ok ? 'tt-ok' : 'tt-no') + '">' + fmtPct(c.brut) + '%</td>' +
+        '<td>' + fmt(c.cashflowMensuel) + '€/mois</td>' +
+        '<td class="' + (ok ? 'tt-ok' : 'tt-no') + '">' + (ok ? '✓ Au-dessus' : '✗ Sous seuil') + '</td>' +
+        '<td><button type="button" class="tbl-open" data-id="' + b.id + '">Voir</button> <button type="button" class="tbl-del" data-id="' + b.id + '">Suppr.</button></td>' +
+      '</tr>';
+    }).join('');
+    return '<div class="table-view-wrap"><table class="biens-table"><thead><tr>' +
+      '<th>Réf.</th><th>Adresse</th><th>Type</th><th>Prix</th><th>Rdt brut</th><th>Cash-flow</th><th>Statut</th><th></th>' +
+      '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+  }
+
+  // ---------- Dupliquer un bien ----------
+  function duplicateBien(b){
+    document.getElementById('f-lieu').value = b.lieu || '';
+    selectedLat = b.lat || null; selectedLon = b.lon || null; selectedDept = null;
+    document.getElementById('f-departement').value = '';
+    document.getElementById('f-lien').value = b.lien || '';
+    document.getElementById('f-type').value = b.type || 'Appartement';
+    document.getElementById('f-surface').value = b.surface || '';
+    document.getElementById('f-prix').value = b.prix || '';
+    document.getElementById('f-notaire').value = b.notaire || '';
+    document.getElementById('f-prixm2-secteur').value = b.prixM2Secteur || '';
+    document.getElementById('f-travaux').value = b.travaux || '';
+    document.getElementById('f-loyer').value = b.loyer || '';
+    document.getElementById('f-charges-recup').value = b.chargesRecup || '';
+    document.getElementById('f-charges-nonrecup').value = b.chargesNonRecup || '';
+    document.getElementById('f-credit-montant').value = (b.credit && b.credit.montant) || '';
+    document.getElementById('f-credit-taux').value = (b.credit && b.credit.taux) || '';
+    document.getElementById('f-credit-duree').value = (b.credit && b.credit.duree) || '';
+    document.getElementById('f-assurance-taux').value = (b.credit && b.credit.assurance) || 0.30;
+    document.getElementById('f-tmi').value = (b.fiscal && b.fiscal.tmi) || 11;
+    document.getElementById('f-frais-compta').value = (b.fiscal && b.fiscal.fraisCompta) || '';
+    document.getElementById('f-mobilier').value = (b.fiscal && b.fiscal.mobilier) || '';
+    document.getElementById('f-terrain-pct').value = (b.fiscal && b.fiscal.terrainPct) || 15;
+    document.getElementById('f-duree-bien').value = (b.fiscal && b.fiscal.dureeBien) || 25;
+    document.getElementById('f-duree-mobilier').value = (b.fiscal && b.fiscal.dureeMobilier) || 7;
+    document.getElementById('f-duree-travaux').value = (b.fiscal && b.fiscal.dureeTravaux) || 10;
+    document.getElementById('f-valorisation-taux').value = (b.valorisationTaux !== undefined ? b.valorisationTaux : 2);
+    document.getElementById('f-commentaire').value = b.commentaire ? (b.commentaire + ' (copie)') : '';
+    selectedCriteres = {};
+    (b.criteres || []).forEach(function(c){ selectedCriteres[c] = true; });
+    renderCriteres();
+    updatePrixM2Readouts();
+    updateCreditReadout();
+    updateRendementLive();
+    updateFiscalLive();
+    updateValorisationLive();
+    var msg = document.getElementById('form-msg');
+    msg.style.color = 'var(--positive)';
+    msg.textContent = 'Bien dupliqué — modifiez ce qui change puis enregistrez pour créer une nouvelle fiche.';
+    openWizard();
+  }
+
+  // ---------- Annuler une suppression (toast) ----------
+  var lastDeleted = null;
+  var lastDeletedTimeout = null;
+  function showUndoToast(bien){
+    lastDeleted = bien;
+    var toast = document.getElementById('undo-toast');
+    toast.classList.add('show');
+    clearTimeout(lastDeletedTimeout);
+    lastDeletedTimeout = setTimeout(function(){ toast.classList.remove('show'); lastDeleted = null; }, 6000);
+  }
+  document.getElementById('btn-undo-delete').addEventListener('click', function(){
+    if(!lastDeleted) return;
+    biens.push(lastDeleted);
+    lastDeleted = null;
+    document.getElementById('undo-toast').classList.remove('show');
+    clearTimeout(lastDeletedTimeout);
+    render();
+    saveBiens();
+  });
+
+  // ---------- Résumé d'accueil (hero) ----------
+  function updateHomeHero(){
+    document.getElementById('hero-count').textContent = biens.length;
+    if(biens.length === 0){
+      document.getElementById('hero-best').textContent = '—';
+      document.getElementById('hero-cashflow').textContent = '—';
+      return;
+    }
+    var calcs = biens.map(calc);
+    var best = Math.max.apply(null, calcs.map(function(c){ return c.brut; }));
+    var totalCashflow = calcs.reduce(function(s, c){ return s + c.cashflowMensuel; }, 0);
+    document.getElementById('hero-best').textContent = fmtPct(best) + '%';
+    document.getElementById('hero-cashflow').textContent = fmt(totalCashflow) + '€';
+  }
+
   function updateRendementLive(){
     var c = currentFormCalc();
     document.getElementById('live-brut').textContent = fmtPct(c.brut) + '%';
@@ -1355,6 +1667,17 @@
     document.getElementById('live-net').textContent = fmtPct(c.net) + '%';
     document.getElementById('live-cashflow').textContent = fmt(c.cashflowMensuel) + '€';
     document.getElementById('live-cashflow').className = 'v small ' + (c.cashflowMensuel >= 0 ? 'positive' : 'caution');
+
+    var wsBrut = document.getElementById('ws-brut');
+    if(wsBrut){
+      var wsNet = document.getElementById('ws-net');
+      var wsCash = document.getElementById('ws-cashflow');
+      wsBrut.textContent = fmtPct(c.brut) + '%';
+      wsBrut.className = 'ws-v ' + (c.brut >= SSEUIL ? 'positive' : 'caution');
+      wsNet.textContent = fmtPct(c.net) + '%';
+      wsCash.textContent = fmt(c.cashflowMensuel) + '€';
+      wsCash.className = 'ws-v ' + (c.cashflowMensuel >= 0 ? 'positive' : 'caution');
+    }
 
     var readout = document.getElementById('rendement-readout');
     var marker = document.getElementById('rendement-marker');
@@ -1566,7 +1889,10 @@
     html += '<div class="meta">' + metaTxt + '</div>';
     if(b.lien){ html += '<div class="meta"><a href="' + esc(b.lien) + '" target="_blank" rel="noopener">Voir l\u2019annonce \u2197</a></div>'; }
     html += '</div>';
+    html += '<div style="display:flex;gap:6px;flex-shrink:0;">';
+    html += '<button class="btn-duplicate" data-id="' + b.id + '">Dupliquer</button>';
     html += '<button class="del" data-id="' + b.id + '">Supprimer</button>';
+    html += '</div>';
     html += '</div>';
     html += '<div class="stats">';
     html += '<div class="stat"><div class="k">Rendement brut</div><div class="v ' + (ok ? 'positive' : 'caution') + '">' + fmtPct(c.brut) + '%</div></div>';
@@ -1606,10 +1932,13 @@
   }
 
   function render(){
+    updateHomeHero();
     var list = document.getElementById('list');
+    var tableView = document.getElementById('table-view');
     document.getElementById('filters-bar').style.display = biens.length === 0 ? 'none' : 'flex';
     if(biens.length === 0){
-      list.innerHTML = '<div class="empty">Aucun bien enregistré pour l\u2019instant.<br>Ajoutez le premier bien repéré via vos alertes.</div>';
+      list.innerHTML = '<div class="empty">Aucun bien enregistré pour l\u2019instant.<br>Appuyez sur le bouton "+" pour ajouter votre premier bien.</div>';
+      tableView.innerHTML = '';
       return;
     }
     populateCritereFilter();
@@ -1634,6 +1963,26 @@
       return true;
     });
 
+    if(listViewMode === 'table'){
+      tableView.innerHTML = tableViewHtml(filtered);
+      Array.prototype.forEach.call(tableView.querySelectorAll('.tbl-del'), function(btn){
+        btn.addEventListener('click', function(){ removeBien(parseInt(btn.getAttribute('data-id'), 10)); });
+      });
+      Array.prototype.forEach.call(tableView.querySelectorAll('.tbl-open'), function(btn){
+        btn.addEventListener('click', function(){
+          var id = parseInt(btn.getAttribute('data-id'), 10);
+          expandedIds[id] = true;
+          listViewMode = 'cards';
+          document.getElementById('btn-toggle-view').textContent = 'Vue tableau';
+          document.getElementById('list').style.display = '';
+          document.getElementById('table-view').style.display = 'none';
+          render();
+        });
+      });
+      list.innerHTML = '';
+      return;
+    }
+
     if(filtered.length === 0){
       list.innerHTML = '<div class="empty">Aucun bien ne correspond à ces filtres.</div>';
       return;
@@ -1645,6 +1994,14 @@
         removeBien(parseInt(btn.getAttribute('data-id'), 10));
       });
     });
+    Array.prototype.forEach.call(list.querySelectorAll('.btn-duplicate'), function(btn){
+      btn.addEventListener('click', function(e){
+        e.stopPropagation();
+        var id = parseInt(btn.getAttribute('data-id'), 10);
+        var b = biens.filter(function(x){ return x.id === id; })[0];
+        if(b) duplicateBien(b);
+      });
+    });
     Array.prototype.forEach.call(list.querySelectorAll('.bien-details a'), function(a){
       a.addEventListener('click', function(e){ e.stopPropagation(); });
     });
@@ -1654,7 +2011,7 @@
   });
 
   document.getElementById('list').addEventListener('click', function(e){
-    if(e.target.closest('.del') || e.target.closest('a')) return;
+    if(e.target.closest('.del') || e.target.closest('.btn-duplicate') || e.target.closest('a')) return;
     var card = e.target.closest('.bien');
     if(!card) return;
     var id = parseInt(card.getAttribute('data-id'), 10);
@@ -1665,10 +2022,12 @@
   });
 
   function removeBien(id){
+    var removed = biens.filter(function(b){ return b.id === id; })[0];
     biens = biens.filter(function(b){ return b.id !== id; });
     delete expandedIds[id];
     render();
     saveBiens();
+    if(removed) showUndoToast(removed);
   }
 
   // ---------- Export Excel (.xlsx) filtrable ----------
@@ -1811,6 +2170,8 @@
     msg.textContent = "Bien enregistré.";
     render();
     saveBiens();
+    showView('home');
+    goToWizardStep(0);
   });
 
   updatePrixM2Readouts();
@@ -1819,6 +2180,7 @@
   updateFiscalLive();
   updateValorisationLive();
   initAnneeSelects();
+  goToWizardStep(0);
   loadCapaciteParams();
 
   // ---------- Authentification (si Firebase configuré) ----------
