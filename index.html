@@ -243,10 +243,10 @@
 
       <label>Prix moyen du secteur / de la rue (€/m²)</label>
       <input id="f-prixm2-secteur" type="number" min="0" placeholder="renseigné auto si connu, sinon à saisir">
-      <button type="button" class="btn-mini" id="btn-update-secteur">Vérifier le secteur (DVF)</button>
+      <button type="button" class="btn-mini" id="btn-update-secteur">Calculer le prix secteur (DVF réel)</button>
       <div class="gradbar secteur" id="secteur-bar"><div class="marker" id="secteur-marker" style="left:50%;"></div></div>
       <div class="bar-readout" id="secteur-readout">Ajoutez la surface, le prix et un prix secteur pour comparer.</div>
-      <div class="hint">Valeur pré-remplie = estimation indicative que j'ai établie moi-même (pas une source officielle). "Vérifier le secteur" copie votre adresse et ouvre explore.data.gouv.fr/fr/immobilier (nouvel explorateur DVF officiel) — collez l'adresse dans sa barre de recherche pour lire le vrai prix des ventes du quartier. Vert = bonne affaire, rouge = cher pour le secteur.</div>
+      <div class="hint">Valeur pré-remplie = estimation indicative que j'ai établie moi-même (pas une source officielle). "Calculer le prix secteur" interroge automatiquement les vraies ventes DVF (DGFiP) dans un rayon de 500m autour de votre adresse via un service communautaire gratuit — sans garantie de disponibilité continue, d'où un repli automatique vers explore.data.gouv.fr si ça ne répond pas. Vert = bonne affaire, rouge = cher pour le secteur.</div>
 
       <div class="section-lbl">Loyer &amp; charges</div>
       <label>Loyer mensuel HC (hors charges) (€)</label>
@@ -576,22 +576,84 @@
     updateRendementLive();
   });
 
-  // ---------- Vérifier le secteur (ouvre le nouvel explorateur DVF, adresse copiée dans le presse-papier) ----------
-  document.getElementById('btn-update-secteur').addEventListener('click', function(){
-    var q = (lieuInput.value || '').trim();
-    if(!q){ alert("Saisissez d'abord une adresse ou un code postal."); return; }
+  // ---------- Vérifier le secteur : recherche automatique DVF (rayon 500m) + repli manuel ----------
+  function median(arr){
+    if(!arr.length) return 0;
+    var s = arr.slice().sort(function(a,b){ return a-b; });
+    var mid = Math.floor(s.length / 2);
+    return s.length % 2 ? s[mid] : (s[mid-1] + s[mid]) / 2;
+  }
+
+  function fetchDvfComps(lat, lon){
+    // API communautaire (Christian Quest / data.cquest.org), gratuite, sans clé, basée sur les
+    // vraies transactions DGFiP. Non officielle, sans garantie de disponibilité — d'où le repli.
+    var url = 'https://api.cquest.org/dvf?lat=' + lat + '&lon=' + lon + '&dist=500';
+    return fetch(url)
+      .then(function(res){ if(!res.ok) throw new Error('dvf failed'); return res.json(); })
+      .then(function(data){
+        var feats = (data && data.features) || [];
+        var comps = [];
+        feats.forEach(function(f){
+          var p = (f && f.properties) || {};
+          var valeur = parseFloat(p.valeur_fonciere);
+          var surface = parseFloat(p.surface_reelle_bati);
+          if(valeur > 1000 && surface > 8 && surface < 500){
+            comps.push({ pm2: valeur / surface, date: p.date_mutation || '' });
+          }
+        });
+        return comps;
+      });
+  }
+
+  function openDvfFallback(q, prefix){
     var url = 'https://explore.data.gouv.fr/fr/immobilier?onglet=carte&filtre=tous';
     var note = document.getElementById('secteur-readout');
     function openSite(copied){
       window.open(url, '_blank', 'noopener');
-      note.textContent = copied
-        ? 'Adresse copiée dans le presse-papier — collez-la (Ctrl+V) dans la barre de recherche du site DVF qui vient de s\'ouvrir.'
-        : ('Copiez cette adresse puis collez-la sur le site DVF qui vient de s\'ouvrir : ' + q);
+      note.textContent = prefix + (copied
+        ? "Adresse copiée — collez-la (Ctrl+V) dans la barre de recherche du site DVF qui vient de s'ouvrir."
+        : ('Copiez cette adresse puis collez-la sur le site DVF qui vient de s\'ouvrir : ' + q));
     }
     if(navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(q).then(function(){ openSite(true); }).catch(function(){ openSite(false); });
     } else {
       openSite(false);
+    }
+  }
+
+  document.getElementById('btn-update-secteur').addEventListener('click', function(){
+    var q = (lieuInput.value || '').trim();
+    if(!q){ alert("Saisissez d'abord une adresse ou un code postal."); return; }
+    var note = document.getElementById('secteur-readout');
+    note.textContent = 'Recherche des ventes réelles à proximité (DVF, rayon 500m)...';
+
+    function withCoords(lat, lon){
+      fetchDvfComps(lat, lon)
+        .then(function(comps){
+          if(comps.length >= 3){
+            var med = median(comps.map(function(c){ return c.pm2; }));
+            document.getElementById('f-prixm2-secteur').value = Math.round(med);
+            updatePrixM2Readouts();
+            updateValorisationLive();
+            var dates = comps.map(function(c){ return c.date; }).filter(Boolean).sort();
+            var range = dates.length ? (' (' + dates[0].slice(0,4) + '–' + dates[dates.length-1].slice(0,4) + ')') : '';
+            note.textContent = 'Mis à jour automatiquement : ' + fmt(med) + ' €/m² — médiane de ' + comps.length + ' ventes DVF réelles dans un rayon de 500m' + range + '. Ajustez si besoin.';
+          } else {
+            openDvfFallback(q, 'Pas assez de ventes DVF trouvées à proximité immédiate. ');
+          }
+        })
+        .catch(function(){
+          openDvfFallback(q, "Le service DVF automatique n'a pas répondu (il n'est pas garanti disponible en continu). ");
+        });
+    }
+
+    if(typeof selectedLat === 'number' && typeof selectedLon === 'number'){
+      withCoords(selectedLat, selectedLon);
+    } else {
+      geocodeAddress(q).then(function(coords){
+        if(coords){ withCoords(coords.lat, coords.lon); }
+        else { openDvfFallback(q, "Adresse non géolocalisable automatiquement. "); }
+      });
     }
   });
 
@@ -880,6 +942,9 @@
     ]).then(function(results){
       var biensRes = results[0];
       var critRes = results[1];
+      biens = [];
+      refCounter = 1;
+      customCriteres = [];
       if(biensRes && biensRes.value){
         var data = JSON.parse(biensRes.value);
         biens = (data.biens || []).map(migrate);
@@ -1214,6 +1279,13 @@
         loadAll();
       } else {
         currentUid = null;
+        // Réinitialisation complète : évite qu'un autre compte hérite des données
+        // encore en mémoire du compte précédent dans le même onglet.
+        biens = [];
+        refCounter = 1;
+        customCriteres = [];
+        expandedIds = {};
+        selectedCriteres = {};
         loginScreen.classList.remove('hidden');
         appRoot.classList.remove('ready');
       }
