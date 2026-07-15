@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Registre de rentabilité — Marseille</title>
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Registre%20de%20rentabilite%20-%20Marseille%22%2C%22short_name%22%3A%22Rentabilite%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23EAEFEA%22%2C%22theme_color%22%3A%22%231F2E35%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage/svg%2Bxml%2C%253Csvg%2520xmlns%253D%2527http%253A//www.w3.org/2000/svg%2527%2520viewBox%253D%25270%25200%2520100%2520100%2527%253E%253Crect%2520width%253D%2527100%2527%2520height%253D%2527100%2527%2520fill%253D%2527%25231F2E35%2527/%253E%253Crect%2520x%253D%25278%2527%2520y%253D%25278%2527%2520width%253D%252784%2527%2520height%253D%252784%2527%2520fill%253D%2527none%2527%2520stroke%253D%2527%2523B8863B%2527%2520stroke-width%253D%25272%2527/%253E%253Ctext%2520x%253D%252750%2527%2520y%253D%252766%2527%2520font-family%253D%2527Georgia%252Cserif%2527%2520font-size%253D%252748%2527%2520fill%253D%2527%2523B8863B%2527%2520text-anchor%253D%2527middle%2527%253ER%253C/text%253E%253C/svg%253E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image/svg%2Bxml%22%7D%2C%7B%22src%22%3A%22data%3Aimage/svg%2Bxml%2C%253Csvg%2520xmlns%253D%2527http%253A//www.w3.org/2000/svg%2527%2520viewBox%253D%25270%25200%2520100%2520100%2527%253E%253Crect%2520width%253D%2527100%2527%2520height%253D%2527100%2527%2520fill%253D%2527%25231F2E35%2527/%253E%253Crect%2520x%253D%25278%2527%2520y%253D%25278%2527%2520width%253D%252784%2527%2520height%253D%252784%2527%2520fill%253D%2527none%2527%2520stroke%253D%2527%2523B8863B%2527%2520stroke-width%253D%25272%2527/%253E%253Ctext%2520x%253D%252750%2527%2520y%253D%252766%2527%2520font-family%253D%2527Georgia%252Cserif%2527%2520font-size%253D%252748%2527%2520fill%253D%2527%2523B8863B%2527%2520text-anchor%253D%2527middle%2527%253ER%253C/text%253E%253C/svg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image/svg%2Bxml%22%7D%5D%7D">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20100%20100%27%3E%3Crect%20width%3D%27100%27%20height%3D%27100%27%20fill%3D%27%231F2E35%27/%3E%3Crect%20x%3D%278%27%20y%3D%278%27%20width%3D%2784%27%20height%3D%2784%27%20fill%3D%27none%27%20stroke%3D%27%23B8863B%27%20stroke-width%3D%272%27/%3E%3Ctext%20x%3D%2750%27%20y%3D%2766%27%20font-family%3D%27Georgia%2Cserif%27%20font-size%3D%2748%27%20fill%3D%27%23B8863B%27%20text-anchor%3D%27middle%27%3ER%3C/text%3E%3C/svg%3E">
+<meta name="theme-color" content="#1F2E35">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Rentabilité">
+</head>
+<body>
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@400;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+  :root{
+    --paper:#EAEFEA;
+    --paper-line:#C7CFC7;
+    --ink:#1F2E35;
+    --ink-soft:#4A5B60;
+    --gold:#B8863B;
+    --positive:#3F6B4F;
+    --caution:#A6472F;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;}
+  .app{
+    background:var(--paper);
+    background-image:
+      linear-gradient(var(--paper-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--paper-line) 1px, transparent 1px);
+    background-size: 28px 28px;
+    background-position: -1px -1px;
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    padding:28px;
+    min-height:100%;
+  }
+  .masthead{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:22px;flex-wrap:wrap;gap:14px;}
+  .masthead h1{font-family:'Zilla Slab',serif;font-weight:700;font-size:28px;margin:0;letter-spacing:0.2px;}
+  .masthead .sub{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1px;}
+  .masthead-right{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+  .seuil-edit{text-align:right;}
+  .seuil-edit .lbl{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;}
+  .seuil-edit .row{display:flex;align-items:center;gap:5px;}
+  .seuil-edit input{width:64px;text-align:right;background:#fff;border:1px solid var(--ink-soft);padding:6px 7px;font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--gold);font-weight:600;}
+  .seuil-edit .pct{font-family:'IBM Plex Mono',monospace;color:var(--gold);font-weight:600;}
+  .btn-mail{background:var(--ink);color:var(--paper);border:none;padding:10px 14px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.5px;text-transform:uppercase;cursor:pointer;}
+  .btn-mail:hover{background:var(--gold);}
+
+  .layout{display:grid;grid-template-columns:330px 1fr;gap:24px;align-items:start;}
+  @media (max-width:820px){.layout{grid-template-columns:1fr;}}
+
+  .panel{background:rgba(255,255,255,0.55);border:1px solid var(--ink);padding:18px;}
+  .panel h2{font-family:'Zilla Slab',serif;font-size:15px;margin:0 0 14px 0;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px dashed var(--ink-soft);padding-bottom:8px;}
+  .section-lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--gold);letter-spacing:0.8px;margin:18px 0 4px 0;border-top:1px dashed var(--paper-line);padding-top:12px;}
+  .section-lbl:first-of-type{border-top:none;margin-top:0;padding-top:0;}
+
+  label{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;text-transform:uppercase;color:var(--ink-soft);letter-spacing:0.5px;margin:10px 0 4px 0;}
+  input, select, textarea{width:100%;background:#fff;border:1px solid var(--ink-soft);padding:8px 9px;font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);}
+  textarea{resize:vertical;min-height:52px;}
+  input:focus, select:focus, textarea:focus{outline:2px solid var(--gold); border-color:var(--gold);}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+  .autocomplete-wrap{position:relative;}
+  .suggestions{position:absolute;z-index:20;left:0;right:0;top:100%;background:#fff;border:1px solid var(--ink);border-top:none;max-height:180px;overflow-y:auto;}
+  .suggestions div{padding:8px 9px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--paper-line);}
+  .suggestions div:last-child{border-bottom:none;}
+  .suggestions div:hover{background:var(--paper);}
+  .ac-note{font-size:10.5px;color:var(--ink-soft);margin-top:3px;}
+
+  .readout{background:#fff;border:1px solid var(--paper-line);padding:8px 9px;font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--ink-soft);}
+
+  .gradbar{position:relative;height:10px;border-radius:5px;margin-top:8px;}
+  .gradbar.secteur{background:linear-gradient(90deg, #3F6B4F 0%, #C9A227 50%, #A6472F 100%);}
+  .gradbar.rendement{background:linear-gradient(90deg, #A6472F 0%, #C9A227 55%, #3F6B4F 100%);}
+  .gradbar .marker{position:absolute;top:-3px;width:3px;height:16px;background:var(--ink);transform:translateX(-50%);}
+  .gradbar .thresh{position:absolute;top:-6px;width:2px;height:22px;background:var(--gold);transform:translateX(-50%);}
+  .gradbar .thresh .lbl{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--gold);white-space:nowrap;}
+  .bar-readout{font-family:'IBM Plex Mono',monospace;font-size:11px;margin-top:10px;color:var(--ink-soft);}
+
+  .btn{margin-top:18px;width:100%;background:var(--ink);color:var(--paper);border:none;padding:11px;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.5px;text-transform:uppercase;cursor:pointer;}
+  .btn:hover{background:var(--gold);}
+  .btn-mini{background:none;border:1px solid var(--ink-soft);color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;font-size:9.5px;padding:4px 7px;cursor:pointer;margin-top:6px;text-transform:uppercase;}
+  .btn-mini:hover{border-color:var(--gold);color:var(--gold);}
+
+  .hint{font-size:11px;color:var(--ink-soft);margin-top:10px;line-height:1.5;}
+  .empty{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);border:1px dashed var(--ink-soft);padding:30px;text-align:center;}
+
+  .crit-grid{display:flex;flex-direction:column;gap:6px;margin-top:6px;}
+  .crit-item{display:flex;align-items:center;gap:8px;}
+  .crit-item input[type="checkbox"]{width:auto;accent-color:var(--gold);}
+  .crit-item span{font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);text-transform:none;letter-spacing:normal;}
+  .crit-add{display:flex;gap:8px;margin-top:10px;}
+  .crit-add input{flex:1;}
+  .crit-add button{flex-shrink:0;width:auto;margin-top:0;padding:8px 12px;}
+
+  .bien{background:rgba(255,255,255,0.6);border:1px solid var(--ink);border-left:4px solid var(--ink-soft);padding:14px 16px;margin-bottom:12px;}
+  .bien.ok{border-left-color:var(--positive);}
+  .bien.no{border-left-color:var(--caution);}
+
+  .bien-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+  .ref{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--gold);letter-spacing:0.5px;}
+  .titre{font-family:'Zilla Slab',serif;font-size:18px;font-weight:600;margin:2px 0 2px 0;}
+  .meta{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .meta a{color:var(--ink);}
+  .comment{font-size:12px;color:var(--ink-soft);font-style:italic;margin-top:6px;}
+  .del{background:none;border:1px solid var(--ink-soft);color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;font-size:10px;padding:5px 8px;cursor:pointer;}
+  .del:hover{border-color:var(--caution); color:var(--caution);}
+
+  .stats{display:flex;gap:22px;margin-top:12px;flex-wrap:wrap;}
+  .stat .k{font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--ink-soft);}
+  .stat .v{font-family:'Zilla Slab',serif;font-size:19px;font-weight:600;}
+  .stat .v.positive{color:var(--positive);}
+  .stat .v.caution{color:var(--caution);}
+  .stat .v.small{font-size:15px;}
+
+  .m2badge{display:inline-block;padding:2px 7px;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#fff;margin:4px 4px 0 0;}
+
+  .gauge{margin-top:14px;position:relative;height:34px;}
+  .gauge-line{position:absolute;top:16px;left:0;right:0;height:1px;background:var(--ink);}
+  .gauge-line:before, .gauge-line:after{content:'';position:absolute;top:-4px;width:1px;height:9px;background:var(--ink);}
+  .gauge-line:before{left:0;}
+  .gauge-line:after{right:0;}
+  .gauge-threshold{position:absolute;top:6px;height:18px;width:1px;background:var(--gold);}
+  .gauge-threshold .lbl{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--gold);white-space:nowrap;}
+  .gauge-marker{position:absolute;top:9px;width:11px;height:11px;border-radius:50%;transform:translateX(-50%);border:2px solid var(--paper);}
+  .gauge-marker.positive{background:var(--positive);}
+  .gauge-marker.caution{background:var(--caution);}
+  .gauge-scalelbl{position:absolute;top:20px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--ink-soft);}
+
+  .status{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 0;}
+
+  .bien{cursor:pointer;}
+  .bien-details{display:none;margin-top:12px;padding-top:12px;border-top:1px dashed var(--paper-line);}
+  .bien.expanded .bien-details{display:block;}
+  .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 18px;}
+  .detail-grid .dk{font-family:'IBM Plex Mono',monospace;font-size:9.5px;text-transform:uppercase;color:var(--ink-soft);letter-spacing:0.4px;margin-top:6px;}
+  .detail-grid .dv{font-size:13px;color:var(--ink);word-break:break-word;}
+  .detail-grid .dv a{color:var(--ink);}
+  .expand-hint{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.4px;margin-top:10px;}
+
+  .map-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(31,46,53,0.72);z-index:1000;display:none;align-items:center;justify-content:center;}
+  .map-modal.open{display:flex;}
+  .map-modal-inner{background:var(--paper);border:1px solid var(--ink);width:92vw;height:86vh;display:flex;flex-direction:column;padding:14px;}
+  .map-modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+  .map-modal-header h3{font-family:'Zilla Slab',serif;font-size:17px;margin:0;font-weight:600;}
+  #leaflet-map{flex:1;border:1px solid var(--ink-soft);min-height:200px;}
+  #map-status{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);margin-bottom:8px;}
+
+  .login-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--paper);z-index:2000;display:flex;align-items:center;justify-content:center;}
+  .login-screen.hidden{display:none;}
+  .login-box{background:rgba(255,255,255,0.6);border:1px solid var(--ink);padding:32px;width:320px;max-width:90vw;}
+  .login-box h2{font-family:'Zilla Slab',serif;font-size:20px;margin:0 0 4px 0;}
+  .login-box .sub{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:18px;}
+  .login-msg{font-size:12px;margin-top:10px;min-height:16px;}
+  .login-msg.err{color:var(--caution);}
+  .login-msg.ok{color:var(--positive);}
+  #app-root{display:none;}
+  #app-root.ready{display:block;}
+  .btn-logout{background:none;border:1px solid var(--ink-soft);color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;font-size:9.5px;padding:6px 10px;cursor:pointer;text-transform:uppercase;}
+  .btn-logout:hover{border-color:var(--caution);color:var(--caution);}
+</style>
+
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <h2>Registre de rentabilité</h2>
+    <div class="sub">Accès privé — connexion requise</div>
+    <label>E-mail</label>
+    <input id="login-email" type="email" autocomplete="username">
+    <label>Mot de passe</label>
+    <input id="login-password" type="password" autocomplete="current-password">
+    <button class="btn" id="btn-login" type="button">Se connecter</button>
+    <div class="login-msg" id="login-msg"></div>
+  </div>
+</div>
+
+<div class="app" id="app-root">
+  <div class="masthead">
+    <div>
+      <h1>Registre de rentabilité</h1>
+      <div class="sub">Marseille &amp; alentours — biens &lt; 200 000€</div>
+    </div>
+    <div class="masthead-right">
+      <button class="btn-logout" id="btn-logout" type="button" style="display:none;">Déconnexion</button>
+      <button class="btn-mail" id="btn-map" type="button">Carte</button>
+      <button class="btn-mail" id="btn-export-excel" type="button">Exporter en Excel</button>
+      <button class="btn-mail" id="btn-mail" type="button">Envoyer par mail</button>
+      <div class="seuil-edit">
+        <div class="lbl">Seuil ciblé</div>
+        <div class="row">
+          <input id="f-seuil" type="number" min="0" step="0.1" value="8">
+          <span class="pct">%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="panel">
+      <h2>Nouveau bien</h2>
+
+      <div class="section-lbl">Localisation</div>
+      <label>Adresse ou code postal</label>
+      <div class="autocomplete-wrap">
+        <input id="f-lieu" type="text" placeholder="ex. Chutes Lavie, 13004 Marseille" autocomplete="off">
+        <div class="suggestions" id="f-lieu-suggestions" style="display:none;"></div>
+      </div>
+      <div class="ac-note" id="ac-note">Tapez une adresse ou un code postal (3+ caractères).</div>
+
+      <label>Lien de l'annonce</label>
+      <input id="f-lien" type="url" placeholder="https://...">
+
+      <div class="section-lbl">Bien</div>
+      <label>Type de bien</label>
+      <select id="f-type">
+        <option>Appartement</option>
+        <option>Colocation meublée</option>
+        <option>Immeuble multi-lots</option>
+        <option>Autre</option>
+      </select>
+
+      <div class="row2">
+        <div><label>Surface (m²)</label><input id="f-surface" type="number" min="0" placeholder="45"></div>
+        <div><label>Prix d'achat (€)</label><input id="f-prix" type="number" min="0" placeholder="150000"></div>
+      </div>
+
+      <div class="row2">
+        <div><label>Notaire (€)</label><input id="f-notaire" type="number" min="0" placeholder="auto 7,5%"></div>
+        <div><label>Travaux (€)</label><input id="f-travaux" type="number" min="0" placeholder="0"></div>
+      </div>
+
+      <label>Prix au m² du bien</label>
+      <div class="readout" id="prixm2-bien-readout">— €/m²</div>
+
+      <label>Prix moyen du secteur / de la rue (€/m²)</label>
+      <input id="f-prixm2-secteur" type="number" min="0" placeholder="renseigné auto si connu, sinon à saisir">
+      <button type="button" class="btn-mini" id="btn-update-secteur">Vérifier le secteur (DVF)</button>
+      <div class="gradbar secteur" id="secteur-bar"><div class="marker" id="secteur-marker" style="left:50%;"></div></div>
+      <div class="bar-readout" id="secteur-readout">Ajoutez la surface, le prix et un prix secteur pour comparer.</div>
+      <div class="hint">Valeur pré-remplie = estimation indicative que j'ai établie moi-même (pas une source officielle). "Vérifier le secteur" copie votre adresse et ouvre explore.data.gouv.fr/fr/immobilier (nouvel explorateur DVF officiel) — collez l'adresse dans sa barre de recherche pour lire le vrai prix des ventes du quartier. Vert = bonne affaire, rouge = cher pour le secteur.</div>
+
+      <div class="section-lbl">Loyer &amp; charges</div>
+      <label>Loyer mensuel HC (hors charges) (€)</label>
+      <input id="f-loyer" type="number" min="0" placeholder="850">
+
+      <div class="row2">
+        <div><label>Charges récup. /an (€)</label><input id="f-charges-recup" type="number" min="0" placeholder="600"></div>
+        <div><label>Charges non récup. /an (€)</label><input id="f-charges-nonrecup" type="number" min="0" placeholder="taxe fonc., assurance..."></div>
+      </div>
+      <div class="hint">Récupérables = provisions remboursées par le locataire. Non récupérables = à la charge du propriétaire (taxe foncière, assurance PNO, gestion, copro non récup.).</div>
+
+      <div class="section-lbl">Financement (optionnel)</div>
+      <label>Montant à emprunter (€)</label>
+      <input id="f-credit-montant" type="number" min="0" placeholder="0">
+      <button type="button" class="btn-mini" id="btn-fill-credit">Utiliser le prix d'achat</button>
+
+      <div class="row2">
+        <div><label>Taux annuel (%)</label><input id="f-credit-taux" type="number" min="0" step="0.05" placeholder="3,80"></div>
+        <div><label>Durée (années)</label><input id="f-credit-duree" type="number" min="0" placeholder="20"></div>
+      </div>
+      <label>Mensualité estimée</label>
+      <div class="readout" id="credit-readout">— €/mois</div>
+
+      <div class="section-lbl">Rendement en direct</div>
+      <div class="stats" style="margin-top:0;">
+        <div class="stat"><div class="k">Brut</div><div class="v" id="live-brut">0,0%</div></div>
+        <div class="stat"><div class="k">Net</div><div class="v small" id="live-net">0,0%</div></div>
+        <div class="stat"><div class="k">Cash-flow/mois</div><div class="v small" id="live-cashflow">0€</div></div>
+      </div>
+      <div class="gradbar rendement" id="rendement-bar">
+        <div class="thresh" id="rendement-thresh" style="left:57%;"><span class="lbl" id="rendement-thresh-lbl">8%</span></div>
+        <div class="marker" id="rendement-marker" style="left:0%;"></div>
+      </div>
+      <div class="bar-readout" id="rendement-readout">Renseignez le prix et le loyer pour voir le rendement.</div>
+
+      <div class="section-lbl">Fiscalité (LMNP réel)</div>
+      <div class="row2">
+        <div><label>TMI</label>
+          <select id="f-tmi">
+            <option value="0">0%</option>
+            <option value="11" selected>11%</option>
+            <option value="30">30%</option>
+            <option value="41">41%</option>
+            <option value="45">45%</option>
+          </select>
+        </div>
+        <div><label>Frais comptable /an (€)</label><input id="f-frais-compta" type="number" min="0" placeholder="250"></div>
+      </div>
+      <div class="row2">
+        <div><label>Mobilier à amortir (€)</label><input id="f-mobilier" type="number" min="0" placeholder="5000"></div>
+        <div><label>Terrain non amortissable (%)</label><input id="f-terrain-pct" type="number" min="0" max="100" value="15"></div>
+      </div>
+      <div class="row2">
+        <div><label>Durée amort. bien (ans)</label><input id="f-duree-bien" type="number" min="1" value="25"></div>
+        <div><label>Durée amort. mobilier (ans)</label><input id="f-duree-mobilier" type="number" min="1" value="7"></div>
+      </div>
+      <label>Durée amort. travaux (ans)</label>
+      <input id="f-duree-travaux" type="number" min="1" value="10">
+
+      <label>Après impôt estimé</label>
+      <div class="readout" id="fiscal-readout">—</div>
+      <div class="hint">Estimation simplifiée en régime de croisière (intérêts d'emprunt non dégressifs, amortissement linéaire, prélèvements sociaux 17,2% inclus) — ne remplace pas un comptable LMNP.</div>
+
+      <div class="section-lbl">Projection de valeur</div>
+      <label>Taux de valorisation annuel estimé (%)</label>
+      <input id="f-valorisation-taux" type="number" min="0" step="0.1" value="2">
+      <div class="readout" id="valorisation-readout" style="line-height:1.9;">—</div>
+      <div class="hint">Basée en priorité sur (prix secteur/rue × surface) si renseignés, sinon sur (prix d'achat + travaux) par défaut. Intérêts composés — ne tient pas compte de l'inflation, du marché futur, ni des frais de revente.</div>
+
+      <div class="section-lbl">Critères</div>
+      <div class="crit-grid" id="crit-grid"></div>
+      <div class="crit-add">
+        <input id="f-critere-custom" type="text" placeholder="Ajouter un critère...">
+        <button type="button" class="btn-mini" id="btn-add-critere">Ajouter</button>
+      </div>
+
+      <div class="section-lbl">Notes</div>
+      <label>Commentaire libre</label>
+      <textarea id="f-commentaire" placeholder="Vos notes pour retrouver ce bien plus tard..."></textarea>
+
+      <button class="btn" id="btn-add">Enregistrer le bien</button>
+      <div class="hint" id="form-msg"></div>
+    </div>
+
+    <div id="list"></div>
+  </div>
+
+  <div class="map-modal" id="map-modal">
+    <div class="map-modal-inner">
+      <div class="map-modal-header">
+        <h3>Carte des biens enregistrés</h3>
+        <button class="btn-mini" id="btn-close-map" type="button">Fermer ✕</button>
+      </div>
+      <div id="map-status">—</div>
+      <div id="leaflet-map"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var SSEUIL = 8.0;
+  var biens = [];
+  var refCounter = 1;
+  var selectedCp = '';
+  var selectedLat = null;
+  var selectedLon = null;
+  var expandedIds = {};
+  var customCriteres = [];
+  var selectedCriteres = {};
+
+  var CRITERES_BASE = ['Gros potentiel après travaux','Pure location','Beaucoup de travaux','Résidence principale possible','Extérieur'];
+
+  var PRIX_SECTEUR = {
+    '13001':2900,'13002':3400,'13003':2400,'13004':3300,'13005':3600,'13006':4200,
+    '13007':4600,'13008':4800,'13009':3900,'13010':2900,'13011':2600,'13012':3100,
+    '13013':2300,'13014':2400,'13015':2000,'13016':2100,
+    '13400':2900,'13190':3400,'13600':3600,'13120':2300,'13170':2900,'13500':2400,
+    '13380':3200,'13360':2900,'13127':2400,'13240':2800,'13821':3000
+  };
+
+  function fmt(n){ return new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0}).format(n||0); }
+  function fmtPct(n){ return (n||0).toFixed(1).replace('.', ','); }
+  function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // ========================================================================
+  // >>> COLLEZ ICI la config de votre projet Firebase (Paramètres du projet
+  // > Général > Vos applications > config). Tant que ces valeurs restent
+  // "REMPLACER", l'outil fonctionne sans compte (Claude / navigateur local).
+  // ========================================================================
+  var FIREBASE_CONFIG = {
+    apiKey: "AIzaSyBGteKTPOsWqC0hS_WL0S89DHPc6wFqvGA",
+    authDomain: "app-immo-4cced.firebaseapp.com",
+    projectId: "app-immo-4cced",
+    storageBucket: "app-immo-4cced.firebasestorage.app",
+    messagingSenderId: "5491400798",
+    appId: "1:5491400798:web:3ef475c9b5b9cfaffc14cf"
+  };
+  var firebaseReady = false;
+  var fbAuth = null;
+  var fbDb = null;
+  var currentUid = null;
+
+  function firebaseConfigured(){
+    return FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey !== 'REMPLACER';
+  }
+
+  if(firebaseConfigured() && typeof firebase !== 'undefined'){
+    try{
+      firebase.initializeApp(FIREBASE_CONFIG);
+      fbAuth = firebase.auth();
+      fbDb = firebase.firestore();
+      firebaseReady = true;
+    }catch(e){
+      firebaseReady = false;
+    }
+  }
+
+  function hasStorage(){ return typeof window.storage !== 'undefined' && window.storage; }
+
+  // Stockage à trois niveaux :
+  // 1) Firestore (si Firebase configuré + utilisateur connecté) : synchronisé, privé, multi-appareils.
+  // 2) window.storage (Claude) : fonctionne dans l'aperçu Claude.
+  // 3) localStorage du navigateur : dernier repli, propre à cet appareil.
+  function storageGet(key){
+    if(firebaseReady && currentUid){
+      return fbDb.collection('users').doc(currentUid).collection('data').doc(key).get()
+        .then(function(doc){ return doc.exists ? { key: key, value: doc.data().value } : null; })
+        .catch(function(){ return null; });
+    }
+    if(hasStorage()){
+      return window.storage.get(key, false).catch(function(){ return null; });
+    }
+    try{
+      var v = localStorage.getItem('rentabilite-marseille:' + key);
+      return Promise.resolve(v !== null ? { key: key, value: v } : null);
+    }catch(e){
+      return Promise.resolve(null);
+    }
+  }
+  function storageSet(key, value){
+    if(firebaseReady && currentUid){
+      return fbDb.collection('users').doc(currentUid).collection('data').doc(key).set({ value: value })
+        .then(function(){ return { key: key, value: value }; })
+        .catch(function(){ return null; });
+    }
+    if(hasStorage()){
+      return window.storage.set(key, value, false).catch(function(){ return null; });
+    }
+    try{
+      localStorage.setItem('rentabilite-marseille:' + key, value);
+      return Promise.resolve({ key: key, value: value });
+    }catch(e){
+      return Promise.resolve(null);
+    }
+  }
+  function storageWorks(){
+    if(firebaseReady && currentUid) return true;
+    if(hasStorage()) return true;
+    try{ localStorage.setItem('rentabilite-marseille:test', '1'); localStorage.removeItem('rentabilite-marseille:test'); return true; }
+    catch(e){ return false; }
+  }
+
+  // ---------- Seuil ----------
+  var seuilInput = document.getElementById('f-seuil');
+  seuilInput.addEventListener('input', function(){
+    var v = parseFloat(seuilInput.value);
+    SSEUIL = (!isNaN(v) && v > 0) ? v : 8;
+    updateRendementLive();
+    render();
+  });
+
+  // ---------- Autocomplete adresse ----------
+  var lieuInput = document.getElementById('f-lieu');
+  var suggBox = document.getElementById('f-lieu-suggestions');
+  var acNote = document.getElementById('ac-note');
+  var acTimeout = null;
+
+  lieuInput.addEventListener('input', function(){
+    selectedCp = '';
+    selectedLat = null;
+    selectedLon = null;
+    var q = lieuInput.value.trim();
+    clearTimeout(acTimeout);
+    if(q.length < 3){ suggBox.style.display = 'none'; return; }
+    acTimeout = setTimeout(function(){
+      fetch('https://api-adresse.data.gouv.fr/search/?q=' + encodeURIComponent(q) + '&limit=5')
+        .then(function(res){ if(!res.ok) throw new Error('bad response'); return res.json(); })
+        .then(function(data){
+          var feats = (data && data.features) || [];
+          if(feats.length === 0){ suggBox.style.display = 'none'; return; }
+          suggBox.innerHTML = '';
+          feats.forEach(function(f){
+            var label = f.properties.label;
+            var cp = f.properties.postcode || '';
+            var coords = f.geometry && f.geometry.coordinates;
+            var opt = document.createElement('div');
+            opt.textContent = label;
+            opt.addEventListener('click', function(){
+              lieuInput.value = label;
+              selectedCp = cp;
+              if(coords){ selectedLon = coords[0]; selectedLat = coords[1]; }
+              suggBox.style.display = 'none';
+              maybeFillSecteur();
+            });
+            suggBox.appendChild(opt);
+          });
+          suggBox.style.display = 'block';
+        })
+        .catch(function(){
+          suggBox.style.display = 'none';
+          acNote.textContent = "Recherche d'adresse indisponible ici — saisie libre possible.";
+        });
+    }, 300);
+  });
+  document.addEventListener('click', function(e){
+    if(!lieuInput.contains(e.target) && !suggBox.contains(e.target)) suggBox.style.display = 'none';
+  });
+  function maybeFillSecteur(){
+    var secteurField = document.getElementById('f-prixm2-secteur');
+    if(secteurField.value) return;
+    if(selectedCp && PRIX_SECTEUR[selectedCp]){
+      secteurField.value = PRIX_SECTEUR[selectedCp];
+      updatePrixM2Readouts();
+    }
+  }
+
+  // ---------- Prix au m2 + jauge secteur ----------
+  function updatePrixM2Readouts(){
+    var surface = parseFloat(document.getElementById('f-surface').value) || 0;
+    var prix = parseFloat(document.getElementById('f-prix').value) || 0;
+    var secteur = parseFloat(document.getElementById('f-prixm2-secteur').value) || 0;
+    var readout = document.getElementById('prixm2-bien-readout');
+    var secReadout = document.getElementById('secteur-readout');
+    var marker = document.getElementById('secteur-marker');
+
+    if(surface > 0 && prix > 0){
+      var pm2 = prix / surface;
+      readout.textContent = fmt(pm2) + ' €/m²';
+      if(secteur > 0){
+        var ratio = pm2 / secteur;
+        var clamped = Math.min(1.3, Math.max(0.7, ratio));
+        var pos = ((clamped - 0.7) / (1.3 - 0.7)) * 100;
+        marker.style.left = pos + '%';
+        var verdict, color;
+        if(ratio <= 0.9){ verdict = 'Bonne affaire pour le secteur'; color = 'var(--positive)'; }
+        else if(ratio <= 1.1){ verdict = 'Dans la moyenne du secteur'; color = 'var(--gold)'; }
+        else { verdict = 'Cher pour le secteur'; color = 'var(--caution)'; }
+        secReadout.innerHTML = fmt(pm2) + ' €/m² vs ' + fmt(secteur) + ' €/m² secteur — <span style="color:' + color + '">' + verdict + ' (' + Math.round(ratio*100) + '%)</span>';
+      } else {
+        marker.style.left = '50%';
+        secReadout.textContent = 'Renseignez un prix moyen de secteur pour comparer.';
+      }
+    } else {
+      readout.textContent = '— €/m²';
+      marker.style.left = '50%';
+      secReadout.textContent = 'Ajoutez la surface et le prix du bien pour comparer.';
+    }
+  }
+  ['f-surface','f-prix','f-prixm2-secteur'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', function(){
+      updatePrixM2Readouts();
+      updateValorisationLive();
+    });
+  });
+
+  // ---------- Credit ----------
+  function mensualite(montant, tauxAnnuel, dureeAns){
+    if(!montant || montant <= 0 || !dureeAns || dureeAns <= 0) return 0;
+    var n = dureeAns * 12;
+    if(!tauxAnnuel || tauxAnnuel <= 0) return montant / n;
+    var r = (tauxAnnuel / 100) / 12;
+    var m = montant * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+    return m;
+  }
+  function updateCreditReadout(){
+    var montant = parseFloat(document.getElementById('f-credit-montant').value) || 0;
+    var taux = parseFloat(document.getElementById('f-credit-taux').value) || 0;
+    var duree = parseFloat(document.getElementById('f-credit-duree').value) || 0;
+    var m = mensualite(montant, taux, duree);
+    document.getElementById('credit-readout').textContent = m > 0 ? fmt(m) + ' €/mois' : '— €/mois';
+  }
+  document.getElementById('btn-fill-credit').addEventListener('click', function(){
+    var prix = parseFloat(document.getElementById('f-prix').value) || 0;
+    document.getElementById('f-credit-montant').value = prix;
+    updateCreditReadout();
+    updateRendementLive();
+  });
+
+  // ---------- Vérifier le secteur (ouvre le nouvel explorateur DVF, adresse copiée dans le presse-papier) ----------
+  document.getElementById('btn-update-secteur').addEventListener('click', function(){
+    var q = (lieuInput.value || '').trim();
+    if(!q){ alert("Saisissez d'abord une adresse ou un code postal."); return; }
+    var url = 'https://explore.data.gouv.fr/fr/immobilier?onglet=carte&filtre=tous';
+    var note = document.getElementById('secteur-readout');
+    function openSite(copied){
+      window.open(url, '_blank', 'noopener');
+      note.textContent = copied
+        ? 'Adresse copiée dans le presse-papier — collez-la (Ctrl+V) dans la barre de recherche du site DVF qui vient de s\'ouvrir.'
+        : ('Copiez cette adresse puis collez-la sur le site DVF qui vient de s\'ouvrir : ' + q);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(q).then(function(){ openSite(true); }).catch(function(){ openSite(false); });
+    } else {
+      openSite(false);
+    }
+  });
+
+  // ---------- Carte des biens (Leaflet + OpenStreetMap, sans clé API) ----------
+  var leafletMap = null;
+  var leafletMarkersLayer = null;
+
+  function ensureLeafletMap(){
+    if(leafletMap || typeof L === 'undefined') return;
+    leafletMap = L.map('leaflet-map').setView([43.2965, 5.3698], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19
+    }).addTo(leafletMap);
+    leafletMarkersLayer = L.layerGroup().addTo(leafletMap);
+  }
+
+  function geocodeAddress(address){
+    return fetch('https://api-adresse.data.gouv.fr/search/?q=' + encodeURIComponent(address) + '&limit=1')
+      .then(function(res){ if(!res.ok) throw new Error('geocode failed'); return res.json(); })
+      .then(function(data){
+        var f = data && data.features && data.features[0];
+        if(!f || !f.geometry || !f.geometry.coordinates) return null;
+        return { lat: f.geometry.coordinates[1], lon: f.geometry.coordinates[0] };
+      })
+      .catch(function(){ return null; });
+  }
+
+  function refreshMapMarkers(){
+    var status = document.getElementById('map-status');
+    if(typeof L === 'undefined'){ status.textContent = "La carte n'a pas pu se charger (réseau bloqué ?)."; return; }
+    if(biens.length === 0){
+      status.textContent = 'Aucun bien enregistré pour le moment.';
+      if(leafletMarkersLayer) leafletMarkersLayer.clearLayers();
+      return;
+    }
+    status.textContent = 'Localisation des biens en cours...';
+    var tasks = biens.map(function(b){
+      if(typeof b.lat === 'number' && typeof b.lon === 'number') return Promise.resolve(b);
+      if(!b.lieu){ return Promise.resolve(b); }
+      return geocodeAddress(b.lieu).then(function(coords){
+        if(coords){ b.lat = coords.lat; b.lon = coords.lon; }
+        return b;
+      });
+    });
+    Promise.all(tasks).then(function(updated){
+      leafletMarkersLayer.clearLayers();
+      var bounds = [];
+      var missing = 0;
+      updated.forEach(function(b){
+        if(typeof b.lat === 'number' && typeof b.lon === 'number'){
+          var c = calc(b);
+          var marker = L.marker([b.lat, b.lon]);
+          marker.bindPopup(
+            '<b>MRS-' + String(b.ref).padStart(3, '0') + '</b><br>' + esc(b.lieu) +
+            '<br>Rendement brut : ' + fmtPct(c.brut) + '%' +
+            '<br>Cash-flow : ' + fmt(c.cashflowMensuel) + '€/mois'
+          );
+          marker.addTo(leafletMarkersLayer);
+          bounds.push([b.lat, b.lon]);
+        } else {
+          missing++;
+        }
+      });
+      if(bounds.length > 0){ leafletMap.fitBounds(bounds, { padding: [30, 30] }); }
+      status.textContent = (bounds.length) + ' bien(s) localisé(s)' + (missing > 0 ? ' · ' + missing + " sans adresse géolocalisable" : '') + '.';
+      saveBiens();
+    });
+  }
+
+  document.getElementById('btn-map').addEventListener('click', function(){
+    document.getElementById('map-modal').classList.add('open');
+    ensureLeafletMap();
+    setTimeout(function(){ if(leafletMap) leafletMap.invalidateSize(); refreshMapMarkers(); }, 60);
+  });
+  document.getElementById('btn-close-map').addEventListener('click', function(){
+    document.getElementById('map-modal').classList.remove('open');
+  });
+
+  // ---------- Rendement en direct ----------
+  function currentFormCalc(){
+    var prix = parseFloat(document.getElementById('f-prix').value) || 0;
+    var notaireRaw = parseFloat(document.getElementById('f-notaire').value);
+    var notaire = isNaN(notaireRaw) ? prix * 0.075 : notaireRaw;
+    var travaux = parseFloat(document.getElementById('f-travaux').value) || 0;
+    var loyer = parseFloat(document.getElementById('f-loyer').value) || 0;
+    var chargesNonRecup = parseFloat(document.getElementById('f-charges-nonrecup').value) || 0;
+    var creditMontant = parseFloat(document.getElementById('f-credit-montant').value) || 0;
+    var creditTaux = parseFloat(document.getElementById('f-credit-taux').value) || 0;
+    var creditDuree = parseFloat(document.getElementById('f-credit-duree').value) || 0;
+
+    var total = prix + notaire + travaux;
+    var loyerAnnuel = loyer * 12;
+    var brut = total > 0 ? (loyerAnnuel / total) * 100 : 0;
+    var net = total > 0 ? ((loyerAnnuel - chargesNonRecup) / total) * 100 : 0;
+    var m = mensualite(creditMontant, creditTaux, creditDuree);
+    var cashflowMensuel = (loyerAnnuel - chargesNonRecup - m * 12) / 12;
+    return {prix:prix, travaux:travaux, loyer:loyer, chargesNonRecup:chargesNonRecup, creditMontant:creditMontant, creditTaux:creditTaux, brut:brut, net:net, cashflowMensuel:cashflowMensuel};
+  }
+
+  // ---------- Fiscalité LMNP réel (générique : réutilisée en direct et pour les biens sauvegardés) ----------
+  function calcFiscalGeneric(prix, travaux, chargesNonRecup, loyerAnnuel, creditMontant, creditTaux, cashflowMensuelAvantImpot, fiscal){
+    var baseAmortBien = prix * (1 - (fiscal.terrainPct || 0) / 100);
+    var amortBien = fiscal.dureeBien > 0 ? baseAmortBien / fiscal.dureeBien : 0;
+    var amortMobilier = fiscal.dureeMobilier > 0 ? (fiscal.mobilier || 0) / fiscal.dureeMobilier : 0;
+    var amortTravaux = fiscal.dureeTravaux > 0 ? (travaux || 0) / fiscal.dureeTravaux : 0;
+    var amortTotal = amortBien + amortMobilier + amortTravaux;
+    var interets = (creditMontant || 0) * ((creditTaux || 0) / 100);
+    var chargesReelles = (chargesNonRecup || 0) + interets + (fiscal.fraisCompta || 0);
+    var resultatAvantAmort = loyerAnnuel - chargesReelles;
+    var amortDeductible = Math.min(amortTotal, Math.max(0, resultatAvantAmort));
+    var amortReporte = amortTotal - amortDeductible;
+    var resultatImposable = Math.max(0, resultatAvantAmort - amortDeductible);
+    var tauxImpot = (fiscal.tmi || 0) + 17.2;
+    var impotAnnuel = resultatImposable * tauxImpot / 100;
+    var cashflowNetNetMensuel = cashflowMensuelAvantImpot - impotAnnuel / 12;
+    return {amortTotal:amortTotal, amortDeductible:amortDeductible, amortReporte:amortReporte, resultatImposable:resultatImposable, impotAnnuel:impotAnnuel, cashflowNetNetMensuel:cashflowNetNetMensuel};
+  }
+
+  function readFiscalInputs(){
+    return {
+      tmi: parseFloat(document.getElementById('f-tmi').value) || 0,
+      fraisCompta: parseFloat(document.getElementById('f-frais-compta').value) || 0,
+      mobilier: parseFloat(document.getElementById('f-mobilier').value) || 0,
+      terrainPct: parseFloat(document.getElementById('f-terrain-pct').value) || 0,
+      dureeBien: parseFloat(document.getElementById('f-duree-bien').value) || 25,
+      dureeMobilier: parseFloat(document.getElementById('f-duree-mobilier').value) || 7,
+      dureeTravaux: parseFloat(document.getElementById('f-duree-travaux').value) || 10
+    };
+  }
+
+  function updateFiscalLive(){
+    var c = currentFormCalc();
+    var readout = document.getElementById('fiscal-readout');
+    if(c.prix <= 0 || c.loyer <= 0){ readout.textContent = '—'; return; }
+    var fiscal = readFiscalInputs();
+    var f = calcFiscalGeneric(c.prix, c.travaux, c.chargesNonRecup, c.loyer * 12, c.creditMontant, c.creditTaux, c.cashflowMensuel, fiscal);
+    var color = f.cashflowNetNetMensuel >= 0 ? 'var(--positive)' : 'var(--caution)';
+    readout.innerHTML = 'Impôt annuel estimé : ' + fmt(f.impotAnnuel) + '€ · Cash-flow net-net : <span style="color:' + color + ';font-weight:600;">' + fmt(f.cashflowNetNetMensuel) + '€/mois</span>' + (f.amortReporte > 0 ? ' · amort. reporté : ' + fmt(f.amortReporte) + '€/an' : '');
+  }
+
+  // ---------- Projection de valeur ----------
+  function calcValorisationGeneric(prixM2Secteur, surface, prix, travaux, taux){
+    var useSecteur = (prixM2Secteur > 0 && surface > 0);
+    var base = useSecteur ? (prixM2Secteur * surface) : ((prix || 0) + (travaux || 0));
+    var horizons = [5, 10, 15, 20, 25];
+    var out = {};
+    horizons.forEach(function(h){ out[h] = base * Math.pow(1 + (taux || 0) / 100, h); });
+    out.base = base;
+    out.basedOnSecteur = useSecteur;
+    return out;
+  }
+
+  function updateValorisationLive(){
+    var prix = parseFloat(document.getElementById('f-prix').value) || 0;
+    var travaux = parseFloat(document.getElementById('f-travaux').value) || 0;
+    var surface = parseFloat(document.getElementById('f-surface').value) || 0;
+    var prixM2Secteur = parseFloat(document.getElementById('f-prixm2-secteur').value) || 0;
+    var taux = parseFloat(document.getElementById('f-valorisation-taux').value);
+    if(isNaN(taux)) taux = 2;
+    var readout = document.getElementById('valorisation-readout');
+    var vals = calcValorisationGeneric(prixM2Secteur, surface, prix, travaux, taux);
+    if(vals.base <= 0){ readout.textContent = '—'; return; }
+    var baseNote = vals.basedOnSecteur
+      ? ('Base : ' + fmt(prixM2Secteur) + ' €/m² × ' + surface + ' m² = ' + fmt(vals.base) + '€')
+      : ('Base : prix + travaux = ' + fmt(vals.base) + '€ (renseignez le prix secteur/rue et la surface pour une base plus précise)');
+    readout.innerHTML = baseNote + '<br>' + [5,10,15,20,25].map(function(h){ return h + ' ans : <b>' + fmt(vals[h]) + '€</b>'; }).join('<br>');
+  }
+
+  function updateRendementLive(){
+    var c = currentFormCalc();
+    document.getElementById('live-brut').textContent = fmtPct(c.brut) + '%';
+    document.getElementById('live-brut').className = 'v ' + (c.brut >= SSEUIL ? 'positive' : 'caution');
+    document.getElementById('live-net').textContent = fmtPct(c.net) + '%';
+    document.getElementById('live-cashflow').textContent = fmt(c.cashflowMensuel) + '€';
+    document.getElementById('live-cashflow').className = 'v small ' + (c.cashflowMensuel >= 0 ? 'positive' : 'caution');
+
+    var readout = document.getElementById('rendement-readout');
+    var marker = document.getElementById('rendement-marker');
+    var thresh = document.getElementById('rendement-thresh');
+    var threshLbl = document.getElementById('rendement-thresh-lbl');
+
+    if(c.prix > 0 && c.loyer > 0){
+      var maxScale = Math.max(SSEUIL + 6, c.brut + 3, 14);
+      var pos = Math.min(100, Math.max(0, (c.brut / maxScale) * 100));
+      var threshPos = Math.min(100, (SSEUIL / maxScale) * 100);
+      marker.style.left = pos + '%';
+      thresh.style.left = threshPos + '%';
+      threshLbl.textContent = fmtPct(SSEUIL) + '%';
+      var ok = c.brut >= SSEUIL;
+      readout.innerHTML = fmtPct(c.brut) + '% brut — <span style="color:' + (ok ? 'var(--positive)' : 'var(--caution)') + '">' + (ok ? 'au-dessus du seuil de ' + fmtPct(SSEUIL) + '%' : 'sous le seuil de ' + fmtPct(SSEUIL) + '%') + '</span>';
+    } else {
+      marker.style.left = '0%';
+      readout.textContent = 'Renseignez le prix et le loyer pour voir le rendement.';
+    }
+  }
+  ['f-prix','f-notaire','f-travaux','f-loyer','f-charges-nonrecup','f-credit-montant','f-credit-taux','f-credit-duree',
+   'f-tmi','f-frais-compta','f-mobilier','f-terrain-pct','f-duree-bien','f-duree-mobilier','f-duree-travaux',
+   'f-valorisation-taux'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', function(){
+      updateCreditReadout();
+      updateRendementLive();
+      updateFiscalLive();
+      updateValorisationLive();
+    });
+  });
+
+  document.getElementById('f-tmi').addEventListener('change', function(){
+    updateFiscalLive();
+  });
+
+  // ---------- Criteres ----------
+  function renderCriteres(){
+    var all = CRITERES_BASE.concat(customCriteres);
+    var grid = document.getElementById('crit-grid');
+    grid.innerHTML = '';
+    all.forEach(function(label){
+      var wrap = document.createElement('label');
+      wrap.className = 'crit-item';
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = !!selectedCriteres[label];
+      cb.addEventListener('change', function(){
+        if(cb.checked) selectedCriteres[label] = true; else delete selectedCriteres[label];
+      });
+      var span = document.createElement('span');
+      span.textContent = label;
+      wrap.appendChild(cb);
+      wrap.appendChild(span);
+      grid.appendChild(wrap);
+    });
+  }
+  function saveCustomCriteres(){
+    storageSet('criteres-custom-list', JSON.stringify(customCriteres));
+  }
+  document.getElementById('btn-add-critere').addEventListener('click', function(){
+    var input = document.getElementById('f-critere-custom');
+    var val = input.value.trim();
+    if(!val) return;
+    var all = CRITERES_BASE.concat(customCriteres);
+    if(all.indexOf(val) === -1){
+      customCriteres.push(val);
+      saveCustomCriteres();
+    }
+    selectedCriteres[val] = true;
+    input.value = '';
+    renderCriteres();
+  });
+
+  // ---------- Stockage biens ----------
+  function migrate(b){
+    return {
+      id: b.id,
+      ref: b.ref,
+      lieu: b.lieu || '',
+      lat: (typeof b.lat === 'number') ? b.lat : null,
+      lon: (typeof b.lon === 'number') ? b.lon : null,
+      lien: b.lien || '',
+      type: b.type || 'Appartement',
+      surface: b.surface || 0,
+      prix: b.prix || 0,
+      notaire: (b.notaire !== undefined) ? b.notaire : ((b.prix || 0) * 0.075),
+      prixM2Secteur: b.prixM2Secteur || 0,
+      travaux: b.travaux || 0,
+      loyer: b.loyer || 0,
+      chargesRecup: b.chargesRecup || 0,
+      chargesNonRecup: (b.chargesNonRecup !== undefined) ? b.chargesNonRecup : (b.charges || 0),
+      credit: b.credit || {montant:0, taux:0, duree:0},
+      fiscal: b.fiscal || {tmi:11, fraisCompta:0, mobilier:0, terrainPct:15, dureeBien:25, dureeMobilier:7, dureeTravaux:10},
+      valorisationTaux: (b.valorisationTaux !== undefined) ? b.valorisationTaux : 2,
+      commentaire: b.commentaire || '',
+      criteres: b.criteres || []
+    };
+  }
+
+  function loadAll(){
+    if(!storageWorks()){
+      document.getElementById('form-msg').textContent = "Sauvegarde indisponible dans ce contexte : vos biens ne seront pas conservés après fermeture de l'onglet.";
+      renderCriteres();
+      render();
+      return;
+    }
+    Promise.all([
+      storageGet('biens-marseille-list'),
+      storageGet('criteres-custom-list')
+    ]).then(function(results){
+      var biensRes = results[0];
+      var critRes = results[1];
+      if(biensRes && biensRes.value){
+        var data = JSON.parse(biensRes.value);
+        biens = (data.biens || []).map(migrate);
+        refCounter = data.refCounter || (biens.length + 1);
+      }
+      if(critRes && critRes.value){
+        customCriteres = JSON.parse(critRes.value) || [];
+      }
+      renderCriteres();
+      render();
+    });
+  }
+  function saveBiens(){
+    return storageSet('biens-marseille-list', JSON.stringify({biens: biens, refCounter: refCounter}));
+  }
+
+  // ---------- Calculs par bien ----------
+  function calc(b){
+    var total = b.prix + b.notaire + b.travaux;
+    var loyerAnnuel = b.loyer * 12;
+    var brut = total > 0 ? (loyerAnnuel / total) * 100 : 0;
+    var net = total > 0 ? ((loyerAnnuel - b.chargesNonRecup) / total) * 100 : 0;
+    var m = mensualite(b.credit.montant, b.credit.taux, b.credit.duree);
+    var cashflowMensuel = (loyerAnnuel - b.chargesNonRecup - m * 12) / 12;
+    var prixM2Bien = b.surface > 0 ? b.prix / b.surface : 0;
+    var fiscal = calcFiscalGeneric(b.prix, b.travaux, b.chargesNonRecup, loyerAnnuel, b.credit.montant, b.credit.taux, cashflowMensuel, b.fiscal);
+    var valorisation = calcValorisationGeneric(b.prixM2Secteur, b.surface, b.prix, b.travaux, b.valorisationTaux);
+    return {total:total, loyerAnnuel:loyerAnnuel, brut:brut, net:net, mensualite:m, cashflowMensuel:cashflowMensuel, prixM2Bien:prixM2Bien, fiscal:fiscal, valorisation:valorisation};
+  }
+
+  function secteurBadgeHtml(prixM2Bien, prixM2Secteur){
+    if(!prixM2Bien || !prixM2Secteur) return '';
+    var ratio = prixM2Bien / prixM2Secteur;
+    var color, verdict;
+    if(ratio <= 0.9){ color = 'var(--positive)'; verdict = 'bon prix secteur'; }
+    else if(ratio <= 1.1){ color = 'var(--gold)'; verdict = 'prix moyen secteur'; }
+    else { color = 'var(--caution)'; verdict = 'cher secteur'; }
+    return '<span class="m2badge" style="background:' + color + '">' + verdict + '</span>';
+  }
+
+  function detailRow(k, v){
+    return '<div class="dk">' + k + '</div><div class="dv">' + v + '</div>';
+  }
+
+  function detailsHtml(b){
+    var rows = [
+      ['Adresse complète', esc(b.lieu || '—')],
+      ['Lien annonce', b.lien ? ('<a href="' + esc(b.lien) + '" target="_blank" rel="noopener">' + esc(b.lien) + '</a>') : '—'],
+      ['Type de bien', esc(b.type)],
+      ['Surface', b.surface ? (b.surface + ' m²') : '—'],
+      ['Prix d\u2019achat', fmt(b.prix) + '€'],
+      ['Notaire', fmt(b.notaire) + '€'],
+      ['Travaux', fmt(b.travaux) + '€'],
+      ['Prix/m² secteur saisi', b.prixM2Secteur ? (fmt(b.prixM2Secteur) + '€/m²') : '—'],
+      ['Loyer mensuel HC', fmt(b.loyer) + '€'],
+      ['Charges récup. /an', fmt(b.chargesRecup) + '€'],
+      ['Charges non récup. /an', fmt(b.chargesNonRecup) + '€'],
+      ['Crédit — montant', fmt(b.credit.montant) + '€'],
+      ['Crédit — taux', fmtPct(b.credit.taux) + '%'],
+      ['Crédit — durée', (b.credit.duree || 0) + ' ans'],
+      ['TMI', fmtPct(b.fiscal.tmi) + '%'],
+      ['Frais comptable /an', fmt(b.fiscal.fraisCompta) + '€'],
+      ['Mobilier à amortir', fmt(b.fiscal.mobilier) + '€'],
+      ['Terrain non amortissable', fmtPct(b.fiscal.terrainPct) + '%'],
+      ['Durées amort. bien / mobilier / travaux', (b.fiscal.dureeBien || 0) + ' / ' + (b.fiscal.dureeMobilier || 0) + ' / ' + (b.fiscal.dureeTravaux || 0) + ' ans'],
+      ['Taux de valorisation', fmtPct(b.valorisationTaux) + '%/an'],
+      ['Critères', (b.criteres && b.criteres.length) ? b.criteres.map(esc).join(', ') : '—'],
+      ['Commentaire', b.commentaire ? esc(b.commentaire) : '—']
+    ];
+    return '<div class="bien-details"><div class="detail-grid">' + rows.map(function(r){ return detailRow(r[0], r[1]); }).join('') + '</div></div>';
+  }
+
+  function bienCardHtml(b){
+    var c = calc(b);
+    var ok = c.brut >= SSEUIL;
+    var maxScale = Math.max(SSEUIL + 6, c.brut + 3, 14);
+    var pos = Math.min(100, (c.brut / maxScale) * 100);
+    var threshPos = Math.min(100, (SSEUIL / maxScale) * 100);
+    var cfColor = c.cashflowMensuel >= 0 ? 'positive' : 'caution';
+    var refTxt = 'MRS-' + String(b.ref).padStart(3, '0') + ' · ' + esc(b.type) + (b.surface ? ' · ' + b.surface + ' m²' : '');
+    var metaTxt = fmt(b.prix) + '€ achat · ' + fmt(c.total) + '€ investissement total' + (c.prixM2Bien ? ' · ' + fmt(c.prixM2Bien) + ' €/m²' : '') + ' ' + secteurBadgeHtml(c.prixM2Bien, b.prixM2Secteur);
+    var expanded = !!expandedIds[b.id];
+
+    var html = '';
+    html += '<div class="bien ' + (ok ? 'ok' : 'no') + (expanded ? ' expanded' : '') + '" data-id="' + b.id + '">';
+    html += '<div class="bien-top">';
+    html += '<div>';
+    html += '<div class="ref">' + refTxt + '</div>';
+    html += '<div class="titre">' + esc(b.lieu || 'Sans localisation') + '</div>';
+    html += '<div class="meta">' + metaTxt + '</div>';
+    if(b.lien){ html += '<div class="meta"><a href="' + esc(b.lien) + '" target="_blank" rel="noopener">Voir l\u2019annonce \u2197</a></div>'; }
+    html += '</div>';
+    html += '<button class="del" data-id="' + b.id + '">Supprimer</button>';
+    html += '</div>';
+    html += '<div class="stats">';
+    html += '<div class="stat"><div class="k">Rendement brut</div><div class="v ' + (ok ? 'positive' : 'caution') + '">' + fmtPct(c.brut) + '%</div></div>';
+    html += '<div class="stat"><div class="k">Rendement net</div><div class="v small">' + fmtPct(c.net) + '%</div></div>';
+    html += '<div class="stat"><div class="k">Mensualité crédit</div><div class="v small">' + (c.mensualite > 0 ? fmt(c.mensualite) + '€' : '—') + '</div></div>';
+    html += '<div class="stat"><div class="k">Cash-flow mensuel</div><div class="v small ' + cfColor + '">' + fmt(c.cashflowMensuel) + '€</div></div>';
+    html += '<div class="stat"><div class="k">Cash-flow net-net (LMNP réel)</div><div class="v small ' + (c.fiscal.cashflowNetNetMensuel >= 0 ? 'positive' : 'caution') + '">' + fmt(c.fiscal.cashflowNetNetMensuel) + '€</div></div>';
+    html += '<div class="stat"><div class="k">Statut</div><div class="status" style="color:' + (ok ? 'var(--positive)' : 'var(--caution)') + '">' + (ok ? '\u2713 AU-DESSUS DU SEUIL' : '\u2717 SOUS LE SEUIL') + '</div></div>';
+    html += '</div>';
+    html += '<div class="meta" style="margin-top:8px;">Impôt annuel estimé (LMNP réel) : ' + fmt(c.fiscal.impotAnnuel) + '€' + (c.fiscal.amortReporte > 0 ? ' · amort. reporté : ' + fmt(c.fiscal.amortReporte) + '€/an' : '') + '</div>';
+    html += '<div class="meta">Valorisation estimée (' + fmtPct(b.valorisationTaux) + '%/an) : 10 ans ' + fmt(c.valorisation[10]) + '€ · 20 ans ' + fmt(c.valorisation[20]) + '€</div>';
+    html += '<div class="gauge">';
+    html += '<div class="gauge-line"></div>';
+    html += '<div class="gauge-threshold" style="left:' + threshPos + '%;"><span class="lbl">' + fmtPct(SSEUIL) + '%</span></div>';
+    html += '<div class="gauge-marker ' + (ok ? 'positive' : 'caution') + '" style="left:' + pos + '%;"></div>';
+    html += '<div class="gauge-scalelbl" style="left:0%;">0%</div>';
+    html += '<div class="gauge-scalelbl" style="right:0%;">' + fmtPct(maxScale) + '%</div>';
+    html += '</div>';
+    if(b.criteres && b.criteres.length > 0){
+      html += '<div>' + b.criteres.map(function(cr){ return '<span class="m2badge" style="background:var(--ink-soft);">' + esc(cr) + '</span>'; }).join('') + '</div>';
+    }
+    if(b.commentaire){ html += '<div class="comment">' + esc(b.commentaire) + '</div>'; }
+    html += '<div class="expand-hint">' + (expanded ? '\u25b2 Cliquez pour réduire' : '\u25bc Cliquez pour voir toutes les infos saisies') + '</div>';
+    html += detailsHtml(b);
+    html += '</div>';
+    return html;
+  }
+
+  function render(){
+    var list = document.getElementById('list');
+    if(biens.length === 0){
+      list.innerHTML = '<div class="empty">Aucun bien enregistré pour l\u2019instant.<br>Ajoutez le premier bien repéré via vos alertes.</div>';
+      return;
+    }
+    var sorted = biens.slice().sort(function(a, b){ return calc(b).brut - calc(a).brut; });
+    list.innerHTML = sorted.map(bienCardHtml).join('');
+    Array.prototype.forEach.call(list.querySelectorAll('.del'), function(btn){
+      btn.addEventListener('click', function(e){
+        e.stopPropagation();
+        removeBien(parseInt(btn.getAttribute('data-id'), 10));
+      });
+    });
+    Array.prototype.forEach.call(list.querySelectorAll('.bien-details a'), function(a){
+      a.addEventListener('click', function(e){ e.stopPropagation(); });
+    });
+  }
+
+  document.getElementById('list').addEventListener('click', function(e){
+    if(e.target.closest('.del') || e.target.closest('a')) return;
+    var card = e.target.closest('.bien');
+    if(!card) return;
+    var id = parseInt(card.getAttribute('data-id'), 10);
+    if(expandedIds[id]) delete expandedIds[id]; else expandedIds[id] = true;
+    card.classList.toggle('expanded');
+    var hint = card.querySelector('.expand-hint');
+    if(hint){ hint.textContent = card.classList.contains('expanded') ? '\u25b2 Cliquez pour réduire' : '\u25bc Cliquez pour voir toutes les infos saisies'; }
+  });
+
+  function removeBien(id){
+    biens = biens.filter(function(b){ return b.id !== id; });
+    delete expandedIds[id];
+    render();
+    saveBiens();
+  }
+
+  // ---------- Export Excel (.xlsx) filtrable ----------
+  function buildExportRows(){
+    var allCriteres = CRITERES_BASE.concat(customCriteres);
+    var sorted = biens.slice().sort(function(a, b){ return calc(b).brut - calc(a).brut; });
+    return sorted.map(function(b){
+      var c = calc(b);
+      var row = {
+        'Ref': 'MRS-' + String(b.ref).padStart(3,'0'),
+        'Lieu': b.lieu || '',
+        'Lien annonce': b.lien || '',
+        'Type': b.type,
+        'Surface (m2)': b.surface || '',
+        'Prix achat (EUR)': b.prix,
+        'Notaire (EUR)': Math.round(b.notaire),
+        'Travaux (EUR)': b.travaux,
+        'Investissement total (EUR)': Math.round(c.total),
+        'Prix/m2 bien (EUR)': c.prixM2Bien ? Math.round(c.prixM2Bien) : '',
+        'Prix/m2 secteur (EUR)': b.prixM2Secteur || '',
+        'Loyer HC mensuel (EUR)': b.loyer,
+        'Charges recup /an (EUR)': b.chargesRecup,
+        'Charges non recup /an (EUR)': b.chargesNonRecup,
+        'Mensualite credit (EUR)': c.mensualite ? Math.round(c.mensualite) : '',
+        'Rendement brut (%)': Math.round(c.brut * 10) / 10,
+        'Rendement net (%)': Math.round(c.net * 10) / 10,
+        'Cash-flow mensuel (EUR)': Math.round(c.cashflowMensuel),
+        'Impot annuel LMNP reel (EUR)': Math.round(c.fiscal.impotAnnuel),
+        'Cash-flow net-net LMNP (EUR/mois)': Math.round(c.fiscal.cashflowNetNetMensuel),
+        'Valeur estimee 5 ans (EUR)': Math.round(c.valorisation[5]),
+        'Valeur estimee 10 ans (EUR)': Math.round(c.valorisation[10]),
+        'Valeur estimee 15 ans (EUR)': Math.round(c.valorisation[15]),
+        'Valeur estimee 20 ans (EUR)': Math.round(c.valorisation[20]),
+        'Valeur estimee 25 ans (EUR)': Math.round(c.valorisation[25]),
+        'Statut': c.brut >= SSEUIL ? 'Au-dessus du seuil' : 'Sous le seuil'
+      };
+      allCriteres.forEach(function(crit){
+        row[crit] = (b.criteres && b.criteres.indexOf(crit) > -1) ? 'Oui' : '';
+      });
+      row['Commentaire'] = b.commentaire || '';
+      return row;
+    });
+  }
+
+  function exportExcel(){
+    if(biens.length === 0){ alert('Aucun bien enregistré à exporter pour le moment.'); return false; }
+    if(typeof XLSX === 'undefined'){ alert("La librairie Excel n'a pas pu se charger (réseau bloqué ?)."); return false; }
+    var rows = buildExportRows();
+    var ws = XLSX.utils.json_to_sheet(rows);
+    var headerCount = Object.keys(rows[0]).length;
+    ws['!autofilter'] = { ref: XLSX.utils.encode_range({ s: {r:0, c:0}, e: {r: rows.length, c: headerCount - 1} }) };
+    ws['!cols'] = Object.keys(rows[0]).map(function(k){ return { wch: Math.max(12, Math.min(28, k.length + 2)) }; });
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Biens');
+    XLSX.writeFile(wb, 'registre-rentabilite-marseille.xlsx');
+    return true;
+  }
+
+  document.getElementById('btn-export-excel').addEventListener('click', function(){ exportExcel(); });
+
+  // ---------- Mail : télécharge le fichier Excel puis ouvre le client mail ----------
+  // Un mailto: ne peut pas joindre de fichier automatiquement (restriction de sécurité des navigateurs) :
+  // le fichier est donc téléchargé, et l'e-mail pré-rempli vous rappelle de le joindre manuellement.
+  document.getElementById('btn-mail').addEventListener('click', function(){
+    if(biens.length === 0){ alert('Aucun bien enregistré à envoyer pour le moment.'); return; }
+    var email = window.prompt('Adresse e-mail du destinataire :', '');
+    if(!email) return;
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ alert('Adresse e-mail invalide.'); return; }
+    var ok = exportExcel();
+    if(!ok) return;
+    var subject = 'Registre de rentabilite - ' + biens.length + ' bien(s)';
+    var body = 'Bonjour,\n\nLe fichier registre-rentabilite-marseille.xlsx vient d\'etre telecharge dans vos Telechargements.\nPensez a le joindre manuellement a cet e-mail avant envoi (un navigateur ne peut pas joindre de fichier automatiquement).\n\nCordialement';
+    window.location.href = 'mailto:' + encodeURIComponent(email) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  });
+
+  // ---------- Ajout d'un bien ----------
+  document.getElementById('btn-add').addEventListener('click', function(){
+    var lieu = lieuInput.value.trim();
+    var lien = document.getElementById('f-lien').value.trim();
+    var type = document.getElementById('f-type').value;
+    var surface = parseFloat(document.getElementById('f-surface').value) || 0;
+    var prix = parseFloat(document.getElementById('f-prix').value) || 0;
+    var notaire = parseFloat(document.getElementById('f-notaire').value);
+    if(isNaN(notaire)) notaire = prix * 0.075;
+    var prixM2Secteur = parseFloat(document.getElementById('f-prixm2-secteur').value) || 0;
+    var travaux = parseFloat(document.getElementById('f-travaux').value) || 0;
+    var loyer = parseFloat(document.getElementById('f-loyer').value) || 0;
+    var chargesRecup = parseFloat(document.getElementById('f-charges-recup').value) || 0;
+    var chargesNonRecup = parseFloat(document.getElementById('f-charges-nonrecup').value) || 0;
+    var creditMontant = parseFloat(document.getElementById('f-credit-montant').value) || 0;
+    var creditTaux = parseFloat(document.getElementById('f-credit-taux').value) || 0;
+    var creditDuree = parseFloat(document.getElementById('f-credit-duree').value) || 0;
+    var commentaire = document.getElementById('f-commentaire').value.trim();
+    var criteres = Object.keys(selectedCriteres);
+    var fiscal = readFiscalInputs();
+    var valorisationTaux = parseFloat(document.getElementById('f-valorisation-taux').value);
+    if(isNaN(valorisationTaux)) valorisationTaux = 2;
+
+    var msg = document.getElementById('form-msg');
+    if(prix <= 0 || loyer <= 0){
+      msg.style.color = 'var(--caution)';
+      msg.textContent = "Renseignez au moins le prix d'achat et le loyer mensuel HC.";
+      return;
+    }
+
+    var bien = {
+      id: Date.now(), ref: refCounter, lieu: lieu, lat: selectedLat, lon: selectedLon, lien: lien, type: type, surface: surface, prix: prix, notaire: notaire,
+      prixM2Secteur: prixM2Secteur, travaux: travaux, loyer: loyer, chargesRecup: chargesRecup, chargesNonRecup: chargesNonRecup,
+      credit: {montant: creditMontant, taux: creditTaux, duree: creditDuree},
+      fiscal: fiscal, valorisationTaux: valorisationTaux,
+      commentaire: commentaire, criteres: criteres
+    };
+    biens.push(bien);
+    refCounter += 1;
+    selectedLat = null;
+    selectedLon = null;
+
+    ['f-lieu','f-lien','f-surface','f-prix','f-notaire','f-prixm2-secteur','f-travaux','f-loyer',
+     'f-charges-recup','f-charges-nonrecup','f-credit-montant','f-credit-taux','f-credit-duree',
+     'f-frais-compta','f-mobilier','f-commentaire'].forEach(function(id){
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('f-tmi').value = '11';
+    document.getElementById('f-terrain-pct').value = '15';
+    document.getElementById('f-duree-bien').value = '25';
+    document.getElementById('f-duree-mobilier').value = '7';
+    document.getElementById('f-duree-travaux').value = '10';
+    document.getElementById('f-valorisation-taux').value = '2';
+    selectedCriteres = {};
+    renderCriteres();
+    updatePrixM2Readouts();
+    updateCreditReadout();
+    updateRendementLive();
+    selectedCp = '';
+
+    msg.style.color = 'var(--ink-soft)';
+    msg.textContent = "Bien enregistré.";
+    render();
+    saveBiens();
+  });
+
+  updatePrixM2Readouts();
+  updateCreditReadout();
+  updateRendementLive();
+  updateFiscalLive();
+  updateValorisationLive();
+
+  // ---------- Authentification (si Firebase configuré) ----------
+  if(firebaseConfigured() && firebaseReady){
+    document.getElementById('btn-logout').style.display = '';
+    document.getElementById('btn-login').addEventListener('click', function(){
+      var email = document.getElementById('login-email').value.trim();
+      var password = document.getElementById('login-password').value;
+      var msg = document.getElementById('login-msg');
+      msg.className = 'login-msg';
+      msg.textContent = 'Connexion...';
+      fbAuth.signInWithEmailAndPassword(email, password)
+        .catch(function(err){
+          msg.className = 'login-msg err';
+          msg.textContent = 'Échec de connexion : identifiants incorrects.';
+        });
+    });
+    document.getElementById('login-password').addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){ document.getElementById('btn-login').click(); }
+    });
+    document.getElementById('btn-logout').addEventListener('click', function(){
+      fbAuth.signOut();
+    });
+    fbAuth.onAuthStateChanged(function(user){
+      var loginScreen = document.getElementById('login-screen');
+      var appRoot = document.getElementById('app-root');
+      if(user){
+        currentUid = user.uid;
+        loginScreen.classList.add('hidden');
+        appRoot.classList.add('ready');
+        loadAll();
+      } else {
+        currentUid = null;
+        loginScreen.classList.remove('hidden');
+        appRoot.classList.remove('ready');
+      }
+    });
+  } else {
+    // Pas de Firebase configuré : pas d'écran de connexion, comportement précédent (Claude / local).
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('app-root').classList.add('ready');
+    document.getElementById('btn-logout').style.display = 'none';
+    loadAll();
+  }
+})();
+</script>
+
+</body>
+</html>
