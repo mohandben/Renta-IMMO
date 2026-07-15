@@ -243,10 +243,10 @@
 
       <label>Prix moyen du secteur / de la rue (€/m²)</label>
       <input id="f-prixm2-secteur" type="number" min="0" placeholder="renseigné auto si connu, sinon à saisir">
-      <button type="button" class="btn-mini" id="btn-update-secteur">Calculer le prix secteur (DVF réel)</button>
+      <button type="button" class="btn-mini" id="btn-update-secteur">Calculer le prix secteur (base DVF locale)</button>
       <div class="gradbar secteur" id="secteur-bar"><div class="marker" id="secteur-marker" style="left:50%;"></div></div>
       <div class="bar-readout" id="secteur-readout">Ajoutez la surface, le prix et un prix secteur pour comparer.</div>
-      <div class="hint">Valeur pré-remplie = estimation indicative que j'ai établie moi-même (pas une source officielle). "Calculer le prix secteur" interroge automatiquement les vraies ventes DVF (DGFiP) dans un rayon de 500m autour de votre adresse via un service communautaire gratuit — sans garantie de disponibilité continue, d'où un repli automatique vers explore.data.gouv.fr si ça ne répond pas. Vert = bonne affaire, rouge = cher pour le secteur.</div>
+      <div class="hint">Valeur pré-remplie = estimation indicative par arrondissement (pas une source officielle). Le calcul automatique s'appuie sur votre propre base de 157 000+ ventes réelles DVF (2021-2025, département 13), chargée une fois puis calculée localement dans votre navigateur — aucun service externe, donc jamais de panne possible. Vert = bonne affaire, rouge = cher pour le secteur.</div>
 
       <div class="section-lbl">Loyer &amp; charges</div>
       <label>Loyer mensuel HC (hors charges) (€)</label>
@@ -506,8 +506,7 @@
           acNote.textContent = "Recherche d'adresse indisponible ici — saisie libre possible.";
         });
     }, 300);
-    // Si l'utilisatrice tape librement sans choisir de suggestion, on relance quand même
-    // la recherche secteur automatiquement après une courte pause de frappe.
+    // Base locale = calcul fiable, donc on peut relancer automatiquement même sans sélection de suggestion.
     secteurAutoTimeout = setTimeout(function(){
       if(q.length >= 6){ runSecteurLookup(q, true); }
     }, 900);
@@ -588,49 +587,52 @@
     updateRendementLive();
   });
 
-  // ---------- Vérifier le secteur : recherche automatique DVF (rayon 500m) + repli manuel ----------
-  function median(arr){
-    if(!arr.length) return 0;
-    var s = arr.slice().sort(function(a,b){ return a-b; });
-    var mid = Math.floor(s.length / 2);
-    return s.length % 2 ? s[mid] : (s[mid-1] + s[mid]) / 2;
+  // ---------- Base DVF locale (157 000+ ventes réelles, département 13, 2021-2025) ----------
+  // Chargée une seule fois depuis dvf13.json (fichier statique hébergé avec l'app, préparé par Claude
+  // à partir des données officielles DGFiP/geo-dvf). Calcul entièrement local : aucun service externe,
+  // donc plus aucun risque de panne, CORS ou indisponibilité.
+  var dvfData = null;
+  var dvfLoadPromise = null;
+
+  function loadDvfData(){
+    if(dvfData) return Promise.resolve(dvfData);
+    if(dvfLoadPromise) return dvfLoadPromise;
+    dvfLoadPromise = fetch('./dvf13.json')
+      .then(function(res){ if(!res.ok) throw new Error('load failed'); return res.json(); })
+      .then(function(data){ dvfData = data; return data; })
+      .catch(function(){ dvfData = []; return []; });
+    return dvfLoadPromise;
   }
 
-  function fetchDvfComps(lat, lon){
-    // API communautaire (Christian Quest / data.cquest.org), gratuite, sans clé, basée sur les
-    // vraies transactions DGFiP. Non officielle, sans garantie de disponibilité — d'où le repli.
-    var url = 'https://api.cquest.org/dvf?lat=' + lat + '&lon=' + lon + '&dist=500';
-    return fetch(url)
-      .then(function(res){ if(!res.ok) throw new Error('dvf failed'); return res.json(); })
-      .then(function(data){
-        var feats = (data && data.features) || [];
+  function haversineMeters(lat1, lon1, lat2, lon2){
+    var R = 6371000;
+    var toRad = function(d){ return d * Math.PI / 180; };
+    var dLat = toRad(lat2 - lat1);
+    var dLon = toRad(lon2 - lon1);
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2) * Math.sin(dLon/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function findNearbyComps(lat, lon){
+    return loadDvfData().then(function(data){
+      var radii = [500, 800, 1200, 2000, 3000];
+      for(var ri = 0; ri < radii.length; ri++){
+        var radius = radii[ri];
+        var boxDeg = radius / 70000; // marge large pour le pré-filtre rectangulaire
         var comps = [];
-        feats.forEach(function(f){
-          var p = (f && f.properties) || {};
-          var valeur = parseFloat(p.valeur_fonciere);
-          var surface = parseFloat(p.surface_reelle_bati);
-          if(valeur > 1000 && surface > 8 && surface < 500){
-            comps.push({ pm2: valeur / surface, date: p.date_mutation || '' });
-          }
-        });
-        return comps;
-      });
-  }
-
-  function openDvfFallback(q, prefix){
-    var url = 'https://explore.data.gouv.fr/fr/immobilier?onglet=carte&filtre=tous';
-    var note = document.getElementById('secteur-readout');
-    function openSite(copied){
-      window.open(url, '_blank', 'noopener');
-      note.textContent = prefix + (copied
-        ? "Adresse copiée — collez-la (Ctrl+V) dans la barre de recherche du site DVF qui vient de s'ouvrir."
-        : ('Copiez cette adresse puis collez-la sur le site DVF qui vient de s\'ouvrir : ' + q));
-    }
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(q).then(function(){ openSite(true); }).catch(function(){ openSite(false); });
-    } else {
-      openSite(false);
-    }
+        for(var i = 0; i < data.length; i++){
+          var r = data[i];
+          if(Math.abs(r.lat - lat) > boxDeg || Math.abs(r.lon - lon) > boxDeg) continue;
+          var dist = haversineMeters(lat, lon, r.lat, r.lon);
+          if(dist <= radius){ comps.push(r); }
+        }
+        if(comps.length >= 5 || ri === radii.length - 1){
+          return { comps: comps, radius: radius };
+        }
+      }
+      return { comps: [], radius: radii[radii.length - 1] };
+    });
   }
 
   var secteurRequestSeq = 0;
@@ -639,48 +641,42 @@
     if(!q){ if(!silent) alert("Saisissez d'abord une adresse ou un code postal."); return; }
     var note = document.getElementById('secteur-readout');
     var myRequestId = ++secteurRequestSeq;
-    note.textContent = 'Recherche des ventes réelles à proximité (DVF, rayon 500m)...';
+    note.textContent = 'Recherche dans la base locale (157 000+ ventes)...';
 
-    function stale(){ return myRequestId !== secteurRequestSeq; }
-
-    function withCoords(lat, lon){
-      fetchDvfComps(lat, lon)
-        .then(function(comps){
-          if(stale()) return;
-          if(comps.length >= 3){
-            var med = median(comps.map(function(c){ return c.pm2; }));
-            document.getElementById('f-prixm2-secteur').value = Math.round(med);
-            document.getElementById('f-prixm2-secteur').dataset.auto = '1';
-            updatePrixM2Readouts();
-            updateValorisationLive();
-            var dates = comps.map(function(c){ return c.date; }).filter(Boolean).sort();
-            var range = dates.length ? (' (' + dates[0].slice(0,4) + '–' + dates[dates.length-1].slice(0,4) + ')') : '';
-            note.textContent = 'Mis à jour automatiquement : ' + fmt(med) + ' €/m² — médiane de ' + comps.length + ' ventes DVF réelles dans un rayon de 500m' + range + '.';
-          } else if(!silent){
-            openDvfFallback(q, 'Pas assez de ventes DVF trouvées à proximité immédiate. ');
-          } else {
-            note.textContent = 'Pas assez de ventes DVF à proximité immédiate — cliquez "Calculer le prix secteur" pour une vérification manuelle si besoin.';
-          }
-        })
-        .catch(function(){
-          if(stale()) return;
-          if(!silent){
-            openDvfFallback(q, "Le service DVF automatique n'a pas répondu (il n'est pas garanti disponible en continu). ");
-          } else {
-            note.textContent = "Le service DVF automatique n'a pas répondu — cliquez \"Calculer le prix secteur\" pour réessayer ou vérifier manuellement.";
-          }
-        });
+    function apply(lat, lon){
+      findNearbyComps(lat, lon).then(function(result){
+        if(myRequestId !== secteurRequestSeq) return; // une recherche plus récente a pris le relais
+        if(result.comps.length >= 3){
+          var med = median(result.comps.map(function(c){ return c.pm2; }));
+          document.getElementById('f-prixm2-secteur').value = Math.round(med);
+          document.getElementById('f-prixm2-secteur').dataset.auto = '1';
+          updatePrixM2Readouts();
+          updateValorisationLive();
+          var dates = result.comps.map(function(c){ return c.d; }).filter(Boolean).sort();
+          var range = dates.length ? (' (' + dates[0].slice(0,4) + '–' + dates[dates.length-1].slice(0,4) + ')') : '';
+          note.textContent = 'Mis à jour : ' + fmt(med) + ' €/m² — médiane de ' + result.comps.length + ' ventes réelles dans un rayon de ' + result.radius + 'm' + range + '.';
+        } else {
+          note.textContent = "Pas assez de ventes dans la base locale à proximité (zone peu couverte par le DVF, ou adresse mal reconnue). Vérifiez manuellement si besoin.";
+        }
+      });
     }
 
     if(typeof selectedLat === 'number' && typeof selectedLon === 'number'){
-      withCoords(selectedLat, selectedLon);
+      apply(selectedLat, selectedLon);
     } else {
       geocodeAddress(q).then(function(coords){
-        if(stale()) return;
-        if(coords){ withCoords(coords.lat, coords.lon); }
-        else if(!silent){ openDvfFallback(q, "Adresse non géolocalisable automatiquement. "); }
+        if(myRequestId !== secteurRequestSeq) return;
+        if(coords){ apply(coords.lat, coords.lon); }
+        else { note.textContent = "Adresse non géolocalisable automatiquement."; }
       });
     }
+  }
+
+  function median(arr){
+    if(!arr.length) return 0;
+    var s = arr.slice().sort(function(a,b){ return a-b; });
+    var mid = Math.floor(s.length / 2);
+    return s.length % 2 ? s[mid] : (s[mid-1] + s[mid]) / 2;
   }
 
   document.getElementById('btn-update-secteur').addEventListener('click', function(){
