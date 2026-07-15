@@ -85,7 +85,7 @@
   .gradbar .marker{position:absolute;top:-3px;width:3px;height:16px;background:var(--ink);transform:translateX(-50%);}
   .gradbar .thresh{position:absolute;top:-6px;width:2px;height:22px;background:var(--gold);transform:translateX(-50%);}
   .gradbar .thresh .lbl{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--gold);white-space:nowrap;}
-  .bar-readout{font-family:'IBM Plex Mono',monospace;font-size:11px;margin-top:10px;color:var(--ink-soft);}
+  .bar-readout{font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;margin-top:10px;padding:8px 10px;background:rgba(255,255,255,0.6);border-left:3px solid var(--gold);color:var(--ink);}
 
   .btn{margin-top:18px;width:100%;background:var(--ink);color:var(--paper);border:none;padding:11px;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.5px;text-transform:uppercase;cursor:pointer;}
   .btn:hover{background:var(--gold);}
@@ -517,9 +517,10 @@
   });
   function maybeFillSecteur(){
     var secteurField = document.getElementById('f-prixm2-secteur');
-    if(secteurField.value) return;
+    if(secteurField.value && !secteurField.dataset.auto) return; // ne jamais écraser une saisie manuelle
     if(selectedCp && PRIX_SECTEUR[selectedCp]){
       secteurField.value = PRIX_SECTEUR[selectedCp];
+      secteurField.dataset.auto = '1';
       updatePrixM2Readouts();
     }
   }
@@ -558,6 +559,7 @@
   }
   ['f-surface','f-prix','f-prixm2-secteur'].forEach(function(id){
     document.getElementById(id).addEventListener('input', function(){
+      if(id === 'f-prixm2-secteur'){ delete document.getElementById(id).dataset.auto; }
       updatePrixM2Readouts();
       updateValorisationLive();
     });
@@ -631,17 +633,24 @@
     }
   }
 
+  var secteurRequestSeq = 0;
+
   function runSecteurLookup(q, silent){
     if(!q){ if(!silent) alert("Saisissez d'abord une adresse ou un code postal."); return; }
     var note = document.getElementById('secteur-readout');
+    var myRequestId = ++secteurRequestSeq;
     note.textContent = 'Recherche des ventes réelles à proximité (DVF, rayon 500m)...';
+
+    function stale(){ return myRequestId !== secteurRequestSeq; }
 
     function withCoords(lat, lon){
       fetchDvfComps(lat, lon)
         .then(function(comps){
+          if(stale()) return;
           if(comps.length >= 3){
             var med = median(comps.map(function(c){ return c.pm2; }));
             document.getElementById('f-prixm2-secteur').value = Math.round(med);
+            document.getElementById('f-prixm2-secteur').dataset.auto = '1';
             updatePrixM2Readouts();
             updateValorisationLive();
             var dates = comps.map(function(c){ return c.date; }).filter(Boolean).sort();
@@ -654,6 +663,7 @@
           }
         })
         .catch(function(){
+          if(stale()) return;
           if(!silent){
             openDvfFallback(q, "Le service DVF automatique n'a pas répondu (il n'est pas garanti disponible en continu). ");
           } else {
@@ -666,6 +676,7 @@
       withCoords(selectedLat, selectedLon);
     } else {
       geocodeAddress(q).then(function(coords){
+        if(stale()) return;
         if(coords){ withCoords(coords.lat, coords.lon); }
         else if(!silent){ openDvfFallback(q, "Adresse non géolocalisable automatiquement. "); }
       });
